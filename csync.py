@@ -1,17 +1,98 @@
 #!/usr/bin/env python
 
+import os
 import sys
-
-import csynclib
+import argparse
+import ConfigParser
 import ctypes
 
-def getUser():
-	"""return the username for authentication to the ownCloud server"""
-	return 'USER'
+import csynclib
+import version
+VERSION = version.version
 
-def getPass():
-	"""return the password for authentication to the ownCloud server"""
-	return 'password'
+#Use global variables for user/pass & fingerprint because we have to handle this C callback stuff.
+USERNAME = ''
+PASSWORD = ''
+#TODO, right now, we just blindly accept SSL servers.
+SSLFINGERPRINT = ''
+
+def authCallback(prompt, buffer, bufferLength, echo, verify, userData):
+	"""
+	(const char *prompt, char *buf, size_t len,
+		int echo, int verify, void *userdata)
+	called like this:
+		("Enter your username: ", buf, NE_ABUFSIZ-1, 1, 0, dav_session.userdata )
+		type is 1 for username, 0 for password.
+	"""
+	print 'authCallback:', prompt,  buffer,  bufferLength, echo, verify, userData
+	#print 'string:', ctypes.string_at(buffer, bufferLength-1)
+	ret = ''
+	if 'username' in prompt:
+		ret = USERNAME
+	elif 'password' in prompt:
+		ret = PASSWORD
+	elif 'SSL' in prompt:
+		ret = 'yes'
+	else:
+		print 'authCallback: unknown prompt:', prompt
+		return -1
+	bufferLength = len(ret)
+	for i in range(len(ret)):
+		ctypes.memset(buffer+i, ord(ret[i]), 1)
+	print 'returning:', ctypes.string_at(buffer, bufferLength)
+	return 0
+
+class ownCloudSync():
+	"""This handles the actual syncying with ownCloud
+	cfg is a {}.  should have these things:
+		user: 
+		pass:
+		url:
+		src:
+	None of them are optional. :)
+	optional items:
+		SSLfingerPrint:
+	"""
+	def __init__(self, cfg = None):
+		"""initialize"""
+		self.cfg = cfg
+		global USERNAME, PASSWORD, SSLFINGERPRINT
+		USERNAME = cfg['user']
+		PASSWORD = cfg['pass']
+		SSLFINGERPRINT = cfg['sslFingerprint']
+		c = csynclib.CSYNC()
+		self.ctx = ctypes.pointer(c)
+		self.connect()
+		self.sync()
+	
+	def connect(self):
+		r = csynclib.csync_create(self.ctx, self.cfg['localDir'], self.cfg['url'])
+		if r != 0:
+			error(self.ctx,'csync_create', r)
+		csynclib.csync_set_log_callback(self.ctx, csynclib.csync_log_callback(log))
+		acb = csynclib.csync_auth_callback(authCallback)
+		csynclib.csync_set_auth_callback(self.ctx, acb)
+		return 0
+	
+	def sync(self):
+		r = csynclib.csync_init(self.ctx)
+		if r != 0:
+			error(self.ctx, 'csync_init', r)
+		#csynclib.csync_set_log_verbosity(ctx, 11)
+		r = csynclib.csync_update(self.ctx)
+		if r != 0:
+			error(self.ctx, 'csync_update', r)
+		r = csynclib.csync_reconcile(self.ctx)
+		if r != 0:
+			error(self.ctx, 'csync_reconcile', r)
+		print 'reconcile done'
+		r = csynclib.csync_propagate(self.ctx)
+		if r != 0:
+			error(self.ctx, 'csync_propogate', r)
+		r = csynclib.csync_destroy(self.ctx)
+		if r != 0:
+			error(self.ctx, 'csync_destroy', r)
+		return 
 
 def log(ctx, verbosity, function, buffer, userdata):
 	"""Log stuff from the ocsync library, but it does not work..."""
@@ -30,62 +111,107 @@ def error(ctx, cmd, returnCode):
 		)
 	sys.exit(1)
 
-def authCallback(prompt, buffer, bufferLength, echo, verify, userData):
+
+def getConfigPath():
+	"""get the local configuration file path
 	"""
-	(const char *prompt, char *buf, size_t len,
-	    int echo, int verify, void *userdata)
-	called like this:
-		("Enter your username: ", buf, NE_ABUFSIZ-1, 1, 0, dav_session.userdata )
-		type is 1 for username, 0 for password.
-	"""
-	print 'authCallback:', prompt,  buffer,  bufferLength, echo, verify, userData
-	#print 'string:', ctypes.string_at(buffer, bufferLength-1)
-	ret = ''
-	if 'username' in prompt:
-		ret = getUser()
-	elif 'password' in prompt:
-		ret = getPass()
-	elif 'SSL' in prompt:
-		ret = 'yes'
+	if sys.platform.startswith('linux'):
+		cfgPath = os.path.join('~','.local','share','data','ownCloud')
+		cfgPath = os.path.expanduser(cfgPath) 
+	elif sys.platform == 'darwin':
+		cfgPath = os.path.join('~','Library','Application Support','ownCloud')
+		cfgPath = os.path.expanduser(cfgPath) 
+	elif 'win' in sys.platform:
+		cfgPath = os.path.join('%LOCALAPPDATA%','ownCloud')
+		cfgPath = os.path.expandvars(cfgPath)
 	else:
-		print 'authCallback: unknown prompt:', prompt
-		return -1
-	bufferLength = len(ret)
-	for i in range(len(ret)):
-		ctypes.memset(buffer+i, ord(ret[i]), 1)
-	#print 'returning:', ctypes.string_at(buffer, bufferLength)
-	return 0
+		print 'unkown/not supported platform:', sys.platform
+		sys.exit(1)
+	return cfgPath
 
-def sync(local, remote):
-	c = csynclib.CSYNC()
-	ctx = ctypes.pointer(c)
-	r = csynclib.csync_create(ctx, local, remote)
-	if r != 0:
-		error(ctx,'csync_create', r)
-	csynclib.csync_set_log_callback(ctx, csynclib.csync_log_callback(log))
-	acb = csynclib.csync_auth_callback(authCallback)
-	csynclib.csync_set_auth_callback(ctx, acb)
-	r = csynclib.csync_init(ctx)
-	if r != 0:
-		error(ctx, 'csync_init', r)
-	#csynclib.csync_set_log_verbosity(ctx, 11)
-	r = csynclib.csync_update(ctx)
-	if r != 0:
-		error(ctx, 'csync_update', r)
-	r = csynclib.csync_reconcile(ctx)
-	if r != 0:
-		error(ctx, 'csync_reconcile', r)
-	print 'reconcile done'
-	r = csynclib.csync_propagate(ctx)
-	if r != 0:
-		error(ctx, 'csync_propogate', r)
-	r = csynclib.csync_destroy(ctx)
-	if r != 0:
-		error(ctx, 'csync_destroy', r)
-	return 
+def getConfig(args):
+	cfg = {}
+	cfgFile = None
+	if args['config']:
+		cfgFile = args['config']
+	else:
+		cfgPath = getConfigPath()
+		if os.path.exists(os.path.join(cfgPath,'owncloud.cfg')):
+			cfgFile = os.path.join(cfgPath, 'owncloud.cfg')
+	if cfgFile:	
+		with open(cfgFile) as fd:
+			"""We use the INI file format that Mirall does. we allow more 
+			things in the cfg file...
+				pass: the password
+			"""
+			c = ConfigParser.SafeConfigParser()
+			c.readfp(fd)
+			cfg = dict(c.items('ownCloud'))
+	cfg.setdefault('pass', '')
+	if os.environ.has_key('OCPASS'):
+		cfg['pass'] = os.environ['OCPASS']
+	#make sure we take it out if it's None, for environ option.
+	if not args['pass']:
+		del args['pass']
+	#cmd line arguments win out over config files.
+	cfg.update(args)
+	return cfg
 
-def main(src, dst):
-	sync(src,dst)
+def main(args):
+	cfg = getConfig(args)
+	print cfg
+	sync = ownCloudSync(cfg)
+
 
 if __name__ == '__main__':
-	main(sys.argv[1], sys.argv[2])
+	parser = argparse.ArgumentParser(
+		formatter_class=argparse.RawDescriptionHelpFormatter,
+		description = 'Synchronize files across machines using ownCloud DAV server',
+		epilog = """
+I support the ownCloud config file, which is located here:
+  {cfg}
+I only support the 'ownCloud' section of the config.
+I support the following keys in the cfg  file:
+	user: The username on the ownCloud server
+	url: the url of the ownCloud Server
+	pass: the password on the ownCloud server
+	sslFingerprint: a valid SSL fingerprint for the server.
+	src: local directory to sync against.
+	dst: folder on the server to sync against.
+complete example:
+[ownCloud]
+user=awesomeSauce
+pass=PasswordThisIsSuperSuperSecretReallyISwearLOL
+url=url=https://www.example.org/owncloud/
+sslFingerprint=
+src=/home/awesomeSauce/ownCloud
+dst=clientsync
+
+Password options:
+  *) You can specify on the cmd line: -p (not very safe)
+  *) in the envifonment variable: OCPASS
+  *) in the owncloud.cfg file as pass = <password>
+  the choice is yours, if you put it in the cfg file, be careful to 
+  make sure nobody but you can read the file. (0400/0600 file perms)
+		""".format(cfg = os.path.join(getConfigPath(),'owncloud.cfg')),
+	)
+	v = "%s - repo: %s" % (VERSION.asString, VERSION.asHead)
+	parser.add_argument('-v', '--version', 
+		action='version', 
+		version = '%(prog)s ' + v)
+	parser.add_argument('-c', '--config', nargs='?', default = None,
+		help = "username on server.")
+	parser.add_argument('-u', '--user', nargs='?', default = None,
+		help = "username on server.")
+	parser.add_argument('-p', '--pass', nargs='?',
+		help = "password on server. you can also store this in environment variable OCPASS")
+	parser.add_argument('src', nargs='?',
+		default =  os.path.expanduser(os.path.join('~','ownCloud')),
+		 help = "local Directory to sync with")
+	parser.add_argument('-d', '--dst', nargs='?', default = 'clientsync',
+		help = "fodler on server.")
+	parser.add_argument('url', nargs='?', default = None,
+		 help = "url to sync to.")
+	args = vars(parser.parse_args())
+	main(args)
+

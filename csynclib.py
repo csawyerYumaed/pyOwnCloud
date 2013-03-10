@@ -1,9 +1,19 @@
 from ctypes import *
+import ctypes.util
+import os
+import sys
 
 STRING = c_char_p
 _libraries = {}
-_libraries['/usr/lib/libocsync.so.0'] = CDLL('/usr/lib/libocsync.so.0')
-
+if os.path.exists('/usr/lib/libocsync.so.0'):
+	_libraries['/usr/lib/libocsync.so.0'] = CDLL('/usr/lib/libocsync.so.0')
+else:
+	path = ctypes.util.find_library('libocsync')
+	if path:
+		_libraries['/usr/lib/libocsync.so.0'] = CDLL(path)
+	else:
+		print 'ERROR, can not find shared library libocsync'
+		sys.exit(1)
 
 class LP_LP_csync_s(Structure):
 	pass
