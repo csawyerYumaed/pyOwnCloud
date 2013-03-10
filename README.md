@@ -6,7 +6,7 @@ ownCloud CLI client written in python, more info about owncloud: www.owncloud.or
 Requirements:
 * the ocsync C library from ownCloud. If you install Mirall, you get it for free on linux.
 	if you don't want to install mirall, you can install the 'ocsync' binary package from the owncloud repo's.
-* Python > 2.6
+* Python > 2.6 < 3 (patches welcome)
 * an ownCloud server to sync with. (presumably you already have one of these)
 
 
