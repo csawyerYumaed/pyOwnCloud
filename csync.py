@@ -5,6 +5,7 @@ import sys
 import argparse
 import ConfigParser
 import ctypes
+import re
 
 import csynclib
 import version
@@ -24,7 +25,7 @@ def authCallback(prompt, buffer, bufferLength, echo, verify, userData):
 		("Enter your username: ", buf, NE_ABUFSIZ-1, 1, 0, dav_session.userdata )
 		type is 1 for username, 0 for password.
 	"""
-	print 'authCallback:', prompt,  buffer,  bufferLength, echo, verify, userData
+	#print 'authCallback:', prompt,  buffer,  bufferLength, echo, verify, userData
 	#print 'string:', ctypes.string_at(buffer, bufferLength-1)
 	ret = ''
 	if 'username' in prompt:
@@ -32,20 +33,25 @@ def authCallback(prompt, buffer, bufferLength, echo, verify, userData):
 	elif 'password' in prompt:
 		ret = PASSWORD
 	elif 'SSL' in prompt:
-		ret = 'yes'
+		fingerprint = re.search("fingerprint: ([\\w\\d:]+)", prompt).group(1)
+		if fingerprint == SSLFINGERPRINT:
+			ret = 'yes'
+		else:
+			print 'SSL fingerpting: %s not accepted, aborting' % fingerprint
+			ret = 'no'
 	else:
 		print 'authCallback: unknown prompt:', prompt
 		return -1
 	bufferLength = len(ret)
 	for i in range(len(ret)):
 		ctypes.memset(buffer+i, ord(ret[i]), 1)
-	print 'returning:', ctypes.string_at(buffer, bufferLength)
+	#print 'returning:', ctypes.string_at(buffer, bufferLength)
 	return 0
 
 class ownCloudSync():
 	"""This handles the actual syncying with ownCloud
 	cfg is a {}.  should have these things:
-		user: 
+		user:
 		pass:
 		url:
 		src:
@@ -62,19 +68,45 @@ class ownCloudSync():
 		SSLFINGERPRINT = cfg['sslFingerprint']
 		c = csynclib.CSYNC()
 		self.ctx = ctypes.pointer(c)
-		self.connect()
+		self.buildURL()
+		#import pprint
+		#pprint.pprint(self.cfg)
+		print 'syncing %s to %s logging in as user: %s' %  (self.cfg['src'], 
+			self.cfg['url'],
+			USERNAME,
+			)
+		if cfg['dry_run']:
+			return
 		self.sync()
-	
-	def connect(self):
-		r = csynclib.csync_create(self.ctx, self.cfg['localDir'], self.cfg['url'])
+
+	def buildURL(self):
+		"""build the URL we use for owncloud"""
+		url = self.cfg['url']
+		url = url.replace('https','ownclouds')
+		url = url.replace('http','owncloud')
+		#add / if needed
+		if url[-1:] != '/':
+			url = ''.join((url,'/'))
+		url += self.cfg['davPath']
+		#add / if needed
+		if url[-1:] != '/':
+			url = ''.join((url,'/'))
+		url = ''.join((url, self.cfg['dst']))
+		#take off any trailing slash.
+		if url[-1:] == '/':
+			url = url[:-1]
+		self.cfg['url'] = url
+
+
+
+	def sync(self):
+		r = csynclib.csync_create(self.ctx, self.cfg['src'], self.cfg['url'])
 		if r != 0:
 			error(self.ctx,'csync_create', r)
 		csynclib.csync_set_log_callback(self.ctx, csynclib.csync_log_callback(log))
 		acb = csynclib.csync_auth_callback(authCallback)
 		csynclib.csync_set_auth_callback(self.ctx, acb)
-		return 0
-	
-	def sync(self):
+
 		r = csynclib.csync_init(self.ctx)
 		if r != 0:
 			error(self.ctx, 'csync_init', r)
@@ -85,14 +117,14 @@ class ownCloudSync():
 		r = csynclib.csync_reconcile(self.ctx)
 		if r != 0:
 			error(self.ctx, 'csync_reconcile', r)
-		print 'reconcile done'
+		#print 'reconcile done'
 		r = csynclib.csync_propagate(self.ctx)
 		if r != 0:
 			error(self.ctx, 'csync_propogate', r)
 		r = csynclib.csync_destroy(self.ctx)
 		if r != 0:
 			error(self.ctx, 'csync_destroy', r)
-		return 
+		return
 
 def log(ctx, verbosity, function, buffer, userdata):
 	"""Log stuff from the ocsync library, but it does not work..."""
@@ -148,6 +180,9 @@ def getConfig(args):
 			c.readfp(fd)
 			cfg = dict(c.items('ownCloud'))
 	cfg.setdefault('pass', '')
+	cfg.setdefault('sslFingerprint', '')
+	cfg.setdefault('davPath', 'remote.php/webdav/')
+
 	if os.environ.has_key('OCPASS'):
 		cfg['pass'] = os.environ['OCPASS']
 	#make sure we take it out if it's None, for environ option.
@@ -159,7 +194,6 @@ def getConfig(args):
 
 def main(args):
 	cfg = getConfig(args)
-	print cfg
 	sync = ownCloudSync(cfg)
 
 
@@ -203,14 +237,19 @@ Password options:
 		help = "username on server.")
 	parser.add_argument('-u', '--user', nargs='?', default = None,
 		help = "username on server.")
+	parser.add_argument('--ssl', nargs='?', default = None,
+		dest = 'sslFingerprint',
+		help = "SSL fingerprint on server to accept.")
 	parser.add_argument('-p', '--pass', nargs='?',
 		help = "password on server. you can also store this in environment variable OCPASS")
-	parser.add_argument('src', nargs='?',
+	parser.add_argument('--dry-run', action = 'store_true', default = False,
+		help = "Dry Run, do not actually execute command.")
+	parser.add_argument('-s', '--src', nargs='?',
 		default =  os.path.expanduser(os.path.join('~','ownCloud')),
 		 help = "local Directory to sync with")
 	parser.add_argument('-d', '--dst', nargs='?', default = 'clientsync',
 		help = "fodler on server.")
-	parser.add_argument('url', nargs='?', default = None,
+	parser.add_argument('--url', nargs='?', default = '',
 		 help = "url to sync to.")
 	args = vars(parser.parse_args())
 	main(args)
