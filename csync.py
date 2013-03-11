@@ -268,7 +268,7 @@ Password options:
 		action='version', 
 		version = '%(prog)s ' + v)
 	parser.add_argument('-c', '--config', nargs='?', default = None,
-		help = "username on server.")
+		help = "configuration to use.")
 	parser.add_argument('-u', '--user', nargs='?', default = None,
 		help = "username on server.")
 	parser.add_argument('--ssl', nargs='?', default = None,
