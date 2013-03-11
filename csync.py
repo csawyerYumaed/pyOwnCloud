@@ -231,18 +231,13 @@ def getConfig(args):
 				if pcfg['pass']:
 					pcfg['pass'] = PASSWORD_SAFE
 					pprint.pprint(pcfg)
-	cfg.setdefault('pass', '')
-	cfg.setdefault('sslFingerprint', '')
 	cfg.setdefault('davPath', 'remote.php/webdav/')
-	cfg.setdefault('url', '')
+	cfg.setdefault('sslFingerprint' '')
 
 	if os.environ.has_key('OCPASS'):
 		cfg['pass'] = os.environ['OCPASS']
 		if DEBUG:
 			print 'password coming from environment'
-	#make sure we take it out if it's None, for environ option.
-	if not args['pass']:
-		del args['pass']
 	#cmd line arguments win out over config files.
 	cfg.update(args)
 	if DEBUG:
@@ -259,8 +254,13 @@ def main(args):
 		DEBUG = True
 		print 'turning debug on'
 	cfg = getConfig(args)
-	sync = ownCloudSync(cfg)
-
+	try:
+		sync = ownCloudSync(cfg)
+	except KeyError:
+		exc_type, exc_value, exc_tb = sys.exc_info()
+		print 'sorry this option: %s is required, was not found in cfg file or on cmd line' % (exc_value)
+		if DEBUG:
+			raise
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(
