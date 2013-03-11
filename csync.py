@@ -6,6 +6,7 @@ import argparse
 import ConfigParser
 import ctypes
 import re
+import pprint
 
 import csynclib
 import version
@@ -16,6 +17,8 @@ USERNAME = ''
 PASSWORD = ''
 #TODO, right now, we just blindly accept SSL servers.
 SSLFINGERPRINT = ''
+DEBUG = False
+
 
 def authCallback(prompt, buffer, bufferLength, echo, verify, userData):
 	"""
@@ -25,8 +28,9 @@ def authCallback(prompt, buffer, bufferLength, echo, verify, userData):
 		("Enter your username: ", buf, NE_ABUFSIZ-1, 1, 0, dav_session.userdata )
 		type is 1 for username, 0 for password.
 	"""
-	#print 'authCallback:', prompt,  buffer,  bufferLength, echo, verify, userData
-	#print 'string:', ctypes.string_at(buffer, bufferLength-1)
+	if DEBUG:
+		print 'authCallback:', prompt,  buffer,  bufferLength, echo, verify, userData
+		print 'string:', ctypes.string_at(buffer, bufferLength-1)
 	ret = ''
 	if 'username' in prompt:
 		ret = USERNAME
@@ -45,7 +49,8 @@ def authCallback(prompt, buffer, bufferLength, echo, verify, userData):
 	bufferLength = len(ret)
 	for i in range(len(ret)):
 		ctypes.memset(buffer+i, ord(ret[i]), 1)
-	#print 'returning:', ctypes.string_at(buffer, bufferLength)
+	if DEBUG:
+		print 'returning:', ctypes.string_at(buffer, bufferLength)
 	return 0
 
 class ownCloudSync():
@@ -66,10 +71,12 @@ class ownCloudSync():
 		USERNAME = cfg['user']
 		PASSWORD = cfg['pass']
 		SSLFINGERPRINT = cfg['sslFingerprint']
+		if DEBUG:
+			libVersion = csynclib.csync_version(0,42,1)
+			print 'libocsync version: ', libVersion
 		c = csynclib.CSYNC()
 		self.ctx = ctypes.pointer(c)
 		self.buildURL()
-		#import pprint
 		#pprint.pprint(self.cfg)
 		print 'syncing %s to %s logging in as user: %s' %  (self.cfg['src'], 
 			self.cfg['url'],
@@ -82,6 +89,9 @@ class ownCloudSync():
 	def buildURL(self):
 		"""build the URL we use for owncloud"""
 		url = self.cfg['url']
+		if url == '':
+			print 'you must specify a url, use --url, or put in cfg file'
+			sys.exit(1j)
 		url = url.replace('https','ownclouds')
 		url = url.replace('http','owncloud')
 		#add / if needed
@@ -96,6 +106,9 @@ class ownCloudSync():
 		if url[-1:] == '/':
 			url = url[:-1]
 		self.cfg['url'] = url
+		if DEBUG:
+			print 'buildURL: ', url
+		return
 
 
 
@@ -105,22 +118,31 @@ class ownCloudSync():
 			error(self.ctx,'csync_create', r)
 		csynclib.csync_set_log_callback(self.ctx, csynclib.csync_log_callback(log))
 		acb = csynclib.csync_auth_callback(authCallback)
+		if DEBUG:
+			print 'authCallback setup'
 		csynclib.csync_set_auth_callback(self.ctx, acb)
 
 		r = csynclib.csync_init(self.ctx)
 		if r != 0:
 			error(self.ctx, 'csync_init', r)
-		#csynclib.csync_set_log_verbosity(ctx, 11)
+		if DEBUG:
+			print 'initialization done'
+		#csynclib.csync_set_log_verbosity(self.ctx, 11)
 		r = csynclib.csync_update(self.ctx)
 		if r != 0:
 			error(self.ctx, 'csync_update', r)
+		if DEBUG:
+			print 'update done'
 		r = csynclib.csync_reconcile(self.ctx)
 		if r != 0:
 			error(self.ctx, 'csync_reconcile', r)
-		#print 'reconcile done'
+		if DEBUG:
+			print 'reconcile done'
 		r = csynclib.csync_propagate(self.ctx)
 		if r != 0:
 			error(self.ctx, 'csync_propogate', r)
+		if DEBUG:
+			print 'propogate finished, destroying'
 		r = csynclib.csync_destroy(self.ctx)
 		if r != 0:
 			error(self.ctx, 'csync_destroy', r)
@@ -159,9 +181,14 @@ def getConfigPath():
 	else:
 		print 'unkown/not supported platform:', sys.platform
 		sys.exit(1)
+	if DEBUG:
+		print 'getConfigPath:', cfgPath
 	return cfgPath
 
 def getConfig(args):
+	if DEBUG:
+		print 'from args: '
+		pprint.pprint(args)
 	cfg = {}
 	cfgFile = None
 	if args['config']:
@@ -190,9 +217,16 @@ def getConfig(args):
 		del args['pass']
 	#cmd line arguments win out over config files.
 	cfg.update(args)
+	if DEBUG:
+		print 'finished config file:'
+		pprint.pprint(cfg)
 	return cfg
 
 def main(args):
+	if args['debug']:
+		global DEBUG
+		DEBUG = True	
+		print 'turning debug on'
 	cfg = getConfig(args)
 	sync = ownCloudSync(cfg)
 
@@ -244,6 +278,8 @@ Password options:
 		help = "password on server. you can also store this in environment variable OCPASS")
 	parser.add_argument('--dry-run', action = 'store_true', default = False,
 		help = "Dry Run, do not actually execute command.")
+	parser.add_argument('--debug', action = 'store_true', default = False,
+		help = "print a bunch of debug info.")
 	parser.add_argument('-s', '--src', nargs='?',
 		default =  os.path.expanduser(os.path.join('~','ownCloud')),
 		 help = "local Directory to sync with")
@@ -253,4 +289,3 @@ Password options:
 		 help = "url to sync to.")
 	args = vars(parser.parse_args())
 	main(args)
-
