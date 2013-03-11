@@ -203,6 +203,9 @@ def getConfig(args):
 		if pargs['pass']:
 			pargs['pass'] = PASSWORD_SAFE
 		pprint.pprint(pargs)
+	for k, v in args.iteritems():
+		if not v:
+			del args[k]
 	cfg = {}
 	cfgFile = None
 	if args['config']:
@@ -229,6 +232,7 @@ def getConfig(args):
 	cfg.setdefault('pass', '')
 	cfg.setdefault('sslFingerprint', '')
 	cfg.setdefault('davPath', 'remote.php/webdav/')
+	cfg.setdefault('url', '')
 
 	if os.environ.has_key('OCPASS'):
 		cfg['pass'] = os.environ['OCPASS']
