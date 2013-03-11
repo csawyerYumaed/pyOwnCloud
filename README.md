@@ -3,9 +3,13 @@ pyOwnCloud
 
 ownCloud CLI client written in python, more info about owncloud: www.owncloud.org
 
+This code is in no way currently endorsed or supported by ownCloud, all bugs should be reported here
+and not there.
+
 Requirements:
-* the ocsync C library from ownCloud. If you install Mirall, you get it for free on linux.
+* The ocsync C library from ownCloud. If you install Mirall, you get it for free on linux.
 	if you don't want to install mirall, you can install the 'ocsync' binary package from the owncloud repo's.
+        So far we have only successfully tested against 0.70.4 of the libocsync library.
 * Python > 2.6 < 3 (patches welcome)
 * an ownCloud server to sync with. (presumably you already have one of these)
 
@@ -21,7 +25,7 @@ usage: just run csync.py -h, and it will give you help.
 	    -h, --help            show this help message and exit
       -v, --version
       -c [CONFIG], --config [CONFIG]
-                            username on server.
+                            configuration to use.
       -u [USER], --user [USER]
                             username on server.
       --ssl [SSLFINGERPRINT]
@@ -33,7 +37,7 @@ usage: just run csync.py -h, and it will give you help.
       -s [SRC], --src [SRC]
                         local Directory to sync with
       -d [DST], --dst [DST]
-                        fodler on server.
+                        folder on server.
       --url [URL]           url to sync to.
 
     I support the ownCloud config file, which is located here:
