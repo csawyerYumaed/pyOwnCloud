@@ -268,7 +268,7 @@ Password options:
 		action='version', 
 		version = '%(prog)s ' + v)
 	parser.add_argument('-c', '--config', nargs='?', default = None,
-		help = "username on server.")
+		help = "configuration to use.")
 	parser.add_argument('-u', '--user', nargs='?', default = None,
 		help = "username on server.")
 	parser.add_argument('--ssl', nargs='?', default = None,
@@ -284,7 +284,7 @@ Password options:
 		default =  os.path.expanduser(os.path.join('~','ownCloud')),
 		 help = "local Directory to sync with")
 	parser.add_argument('-d', '--dst', nargs='?', default = 'clientsync',
-		help = "fodler on server.")
+		help = "folder on server.")
 	parser.add_argument('--url', nargs='?', default = '',
 		 help = "url to sync to.")
 	args = vars(parser.parse_args())
