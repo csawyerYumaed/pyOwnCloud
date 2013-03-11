@@ -7,9 +7,12 @@ STRING = c_char_p
 _libraries = {}
 if os.path.exists('/usr/lib/libocsync.so.0'):
 	_libraries['/usr/lib/libocsync.so.0'] = CDLL('/usr/lib/libocsync.so.0')
+if os.path.exists('/usr/lib64/libocsync.so.0'):
+	_libraries['/usr/lib/libocsync.so.0'] = CDLL('/usr/lib64/libocsync.so.0')
 else:
 	path = ctypes.util.find_library('libocsync')
 	if path:
+		print 'found libocsync @', path
 		_libraries['/usr/lib/libocsync.so.0'] = CDLL(path)
 	else:
 		print 'ERROR, can not find shared library libocsync'
