@@ -213,13 +213,19 @@ def getConfig(args):
 			cfgFile = os.path.join(cfgPath, 'owncloud.cfg')
 	if cfgFile:
 		with open(cfgFile) as fd:
-			"""We use the INI file format that Mirall does. we allow more 
+			"""We use the INI file format that Mirall does. we allow more
 			things in the cfg file...
 				pass: the password
 			"""
 			c = ConfigParser.SafeConfigParser()
 			c.readfp(fd)
 			cfg = dict(c.items('ownCloud'))
+			if DEBUG:
+				print 'conifguration info received from %s:' % cfgFile
+				pcfg = copy.copy(cfg)
+				if pcfg['pass']:
+					pcfg['pass'] = PASSWORD_SAFE
+					pprint.pprint(pcfg)
 	cfg.setdefault('pass', '')
 	cfg.setdefault('sslFingerprint', '')
 	cfg.setdefault('davPath', 'remote.php/webdav/')
@@ -304,7 +310,7 @@ Password options:
 		 help = "local Directory to sync with")
 	parser.add_argument('-d', '--dst', nargs='?', default = 'clientsync',
 		help = "folder on server.")
-	parser.add_argument('--url', nargs='?', default = '',
+	parser.add_argument('--url', nargs='?', default = None,
 		 help = "url to sync to.")
 	args = vars(parser.parse_args())
 	main(args)
