@@ -88,7 +88,7 @@ class ownCloudSync():
 			self.cfg['url'],
 			USERNAME,
 			)
-		if cfg['dry_run']:
+		if cfg.has_key('dry_run'):
 			return
 		self.sync()
 
@@ -203,12 +203,14 @@ def getConfig(args):
 		if pargs['pass']:
 			pargs['pass'] = PASSWORD_SAFE
 		pprint.pprint(pargs)
+	newArgs = {}
 	for k, v in args.iteritems():
-		if not v:
-			del args[k]
+		if v:
+			newArgs[k] = v
+	args = newArgs
 	cfg = {}
 	cfgFile = None
-	if args['config']:
+	if args.has_key('config'):
 		cfgFile = args['config']
 	else:
 		cfgPath = getConfigPath()
