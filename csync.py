@@ -7,6 +7,7 @@ import ConfigParser
 import ctypes
 import re
 import pprint
+import copy
 
 import csynclib
 import version
@@ -15,7 +16,7 @@ VERSION = version.version
 #Use global variables for user/pass & fingerprint because we have to handle this C callback stuff.
 USERNAME = ''
 PASSWORD = ''
-#TODO, right now, we just blindly accept SSL servers.
+PASSWORD_SAFE = '********'
 SSLFINGERPRINT = ''
 DEBUG = False
 
@@ -30,7 +31,7 @@ def authCallback(prompt, buffer, bufferLength, echo, verify, userData):
 	"""
 	if DEBUG:
 		print 'authCallback:', prompt,  buffer,  bufferLength, echo, verify, userData
-		print 'string:', ctypes.string_at(buffer, bufferLength-1)
+		#print 'string:', ctypes.string_at(buffer, bufferLength-1)
 	ret = ''
 	if 'username' in prompt:
 		ret = USERNAME
@@ -41,7 +42,7 @@ def authCallback(prompt, buffer, bufferLength, echo, verify, userData):
 		if fingerprint == SSLFINGERPRINT:
 			ret = 'yes'
 		else:
-			print 'SSL fingerpting: %s not accepted, aborting' % fingerprint
+			print 'SSL fingerprint: %s not accepted, aborting' % fingerprint
 			ret = 'no'
 	else:
 		print 'authCallback: unknown prompt:', prompt
@@ -50,7 +51,10 @@ def authCallback(prompt, buffer, bufferLength, echo, verify, userData):
 	for i in range(len(ret)):
 		ctypes.memset(buffer+i, ord(ret[i]), 1)
 	if DEBUG:
-		print 'returning:', ctypes.string_at(buffer, bufferLength)
+		buffString = ctypes.string_at(buffer, bufferLength)
+		if PASSWORD in buffString:
+			buffString = buffString.replace(PASSWORD, PASSWORD_SAFE)
+		print 'returning:', buffString
 	return 0
 
 class ownCloudSync():
@@ -71,9 +75,11 @@ class ownCloudSync():
 		USERNAME = cfg['user']
 		PASSWORD = cfg['pass']
 		SSLFINGERPRINT = cfg['sslFingerprint']
+		libVersion = csynclib.csync_version(0,40,1)
 		if DEBUG:
-			libVersion = csynclib.csync_version(0,42,1)
 			print 'libocsync version: ', libVersion
+		if libVersion != '0.70.4':
+			print 'this version of libocsync %s is not tested against ownCloud server 4.7.5' % libVersion
 		c = csynclib.CSYNC()
 		self.ctx = ctypes.pointer(c)
 		self.buildURL()
@@ -127,7 +133,7 @@ class ownCloudSync():
 			error(self.ctx, 'csync_init', r)
 		if DEBUG:
 			print 'initialization done'
-		#csynclib.csync_set_log_verbosity(self.ctx, 11)
+		#csynclib.csync_set_log_verbosity(self.ctx, ctypes.c_int(11))
 		r = csynclib.csync_update(self.ctx)
 		if r != 0:
 			error(self.ctx, 'csync_update', r)
@@ -160,6 +166,8 @@ def error(ctx, cmd, returnCode):
 	if not errMsg:
 		if errNum == 20 and cmd == 'csync_update':
 			errMsg = 'This is an authentication problem with the server, check user/pass'
+		if errNum == 26 and cmd == 'csync_update':
+			errMsg = 'This is a remote folder destination issue, check that the remote folder exists on ownCloud'
 	print 'ERROR: %s exited %s, error %s: %s' % (
 		cmd,
 		returnCode,
@@ -191,7 +199,10 @@ def getConfigPath():
 def getConfig(args):
 	if DEBUG:
 		print 'from args: '
-		pprint.pprint(args)
+		pargs = copy.copy(args)
+		if pargs['pass']:
+			pargs['pass'] = PASSWORD_SAFE
+		pprint.pprint(pargs)
 	cfg = {}
 	cfgFile = None
 	if args['config']:
@@ -200,7 +211,7 @@ def getConfig(args):
 		cfgPath = getConfigPath()
 		if os.path.exists(os.path.join(cfgPath,'owncloud.cfg')):
 			cfgFile = os.path.join(cfgPath, 'owncloud.cfg')
-	if cfgFile:	
+	if cfgFile:
 		with open(cfgFile) as fd:
 			"""We use the INI file format that Mirall does. we allow more 
 			things in the cfg file...
@@ -215,6 +226,8 @@ def getConfig(args):
 
 	if os.environ.has_key('OCPASS'):
 		cfg['pass'] = os.environ['OCPASS']
+		if DEBUG:
+			print 'password coming from environment'
 	#make sure we take it out if it's None, for environ option.
 	if not args['pass']:
 		del args['pass']
@@ -222,13 +235,16 @@ def getConfig(args):
 	cfg.update(args)
 	if DEBUG:
 		print 'finished config file:'
-		pprint.pprint(cfg)
+		pcfg = copy.copy(cfg)
+		if pcfg['pass']:
+			pcfg['pass'] = PASSWORD_SAFE
+			pprint.pprint(pcfg)
 	return cfg
 
 def main(args):
 	if args['debug']:
 		global DEBUG
-		DEBUG = True	
+		DEBUG = True
 		print 'turning debug on'
 	cfg = getConfig(args)
 	sync = ownCloudSync(cfg)
