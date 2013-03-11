@@ -157,6 +157,9 @@ def error(ctx, cmd, returnCode):
 	"""handle library errors"""
 	errNum = csynclib.csync_get_error(ctx)
 	errMsg = csynclib.csync_get_error_string(ctx)
+	if not errMsg:
+		if errNum == 20 and cmd == 'csync_update':
+			errMsg = 'This is an authentication problem with the server, check user/pass'
 	print 'ERROR: %s exited %s, error %s: %s' % (
 		cmd,
 		returnCode,
