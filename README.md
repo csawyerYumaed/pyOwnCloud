@@ -21,7 +21,7 @@ usage: just run csync.py -h, and it will give you help.
 	    -h, --help            show this help message and exit
       -v, --version
       -c [CONFIG], --config [CONFIG]
-                            username on server.
+                            configuration to use.
       -u [USER], --user [USER]
                             username on server.
       --ssl [SSLFINGERPRINT]
@@ -33,7 +33,7 @@ usage: just run csync.py -h, and it will give you help.
       -s [SRC], --src [SRC]
                         local Directory to sync with
       -d [DST], --dst [DST]
-                        fodler on server.
+                        folder on server.
       --url [URL]           url to sync to.
 
     I support the ownCloud config file, which is located here:
