@@ -284,7 +284,7 @@ Password options:
 		default =  os.path.expanduser(os.path.join('~','ownCloud')),
 		 help = "local Directory to sync with")
 	parser.add_argument('-d', '--dst', nargs='?', default = 'clientsync',
-		help = "fodler on server.")
+		help = "folder on server.")
 	parser.add_argument('--url', nargs='?', default = '',
 		 help = "url to sync to.")
 	args = vars(parser.parse_args())
