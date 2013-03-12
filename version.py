@@ -111,7 +111,7 @@ version = gitVersion()
 
 
 if __name__ == '__main__':
-	print 'testing version'
+	print 'Testing version.'
 	v = hgVersion()
 	print 'dict:', v.version
 	print 'string:', v.asString
