@@ -281,7 +281,7 @@ complete example:
 [ownCloud]
 user=awesomeSauce
 pass=PasswordThisIsSuperSuperSecretReallyISwearLOL
-url=url=https://www.example.org/owncloud/
+url=https://www.example.org/owncloud/
 sslFingerprint=
 src=/home/awesomeSauce/ownCloud
 dst=clientsync

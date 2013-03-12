@@ -54,7 +54,7 @@ usage: just run csync.py -h, and it will give you help.
     [ownCloud]
     user=awesomeSauce
     pass=PasswordThisIsSuperSuperSecretReallyISwearLOL
-    url=url=https://www.example.org/owncloud/
+    url=https://www.example.org/owncloud/
     sslFingerprint=
     src=/home/awesomeSauce/ownCloud
     dst=clientsync
