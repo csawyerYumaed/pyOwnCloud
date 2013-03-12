@@ -79,12 +79,12 @@ class ownCloudSync():
 		if DEBUG:
 			print 'libocsync version: ', libVersion
 		if libVersion != '0.70.4':
-			print 'this version of libocsync %s is not tested against ownCloud server 4.7.5' % libVersion
+			print 'This version of libocsync %s is not tested against ownCloud server 4.7.5.' % libVersion
 		c = csynclib.CSYNC()
 		self.ctx = ctypes.pointer(c)
 		self.buildURL()
 		#pprint.pprint(self.cfg)
-		print 'syncing %s to %s logging in as user: %s' %  (self.cfg['src'], 
+		print 'Syncing %s to %s logging in as user: %s' %  (self.cfg['src'], 
 			self.cfg['url'],
 			USERNAME,
 			)
@@ -96,7 +96,7 @@ class ownCloudSync():
 		"""build the URL we use for owncloud"""
 		url = self.cfg['url']
 		if url == '':
-			print 'you must specify a url, use --url, or put in cfg file'
+			print 'You must specify a url, use --url, or put in cfg file.'
 			sys.exit(1j)
 		url = url.replace('https','ownclouds')
 		url = url.replace('http','owncloud')
@@ -132,23 +132,23 @@ class ownCloudSync():
 		if r != 0:
 			error(self.ctx, 'csync_init', r)
 		if DEBUG:
-			print 'initialization done'
+			print 'Initialization done.'
 		#csynclib.csync_set_log_verbosity(self.ctx, ctypes.c_int(11))
 		r = csynclib.csync_update(self.ctx)
 		if r != 0:
 			error(self.ctx, 'csync_update', r)
 		if DEBUG:
-			print 'update done'
+			print 'Update done.'
 		r = csynclib.csync_reconcile(self.ctx)
 		if r != 0:
 			error(self.ctx, 'csync_reconcile', r)
 		if DEBUG:
-			print 'reconcile done'
+			print 'Reconcile done.'
 		r = csynclib.csync_propagate(self.ctx)
 		if r != 0:
 			error(self.ctx, 'csync_propogate', r)
 		if DEBUG:
-			print 'propogate finished, destroying'
+			print 'Propogate finished, destroying.'
 		r = csynclib.csync_destroy(self.ctx)
 		if r != 0:
 			error(self.ctx, 'csync_destroy', r)
@@ -165,9 +165,9 @@ def error(ctx, cmd, returnCode):
 	errMsg = csynclib.csync_get_error_string(ctx)
 	if not errMsg:
 		if errNum == 20 and cmd == 'csync_update':
-			errMsg = 'This is an authentication problem with the server, check user/pass'
+			errMsg = 'This is an authentication problem with the server, check user/pass.'
 		if errNum == 26 and cmd == 'csync_update':
-			errMsg = 'This is a remote folder destination issue, check that the remote folder exists on ownCloud'
+			errMsg = 'This is a remote folder destination issue, check that the remote folder exists on ownCloud.'
 	print 'ERROR: %s exited %s, error %s: %s' % (
 		cmd,
 		returnCode,
@@ -190,7 +190,7 @@ def getConfigPath():
 		cfgPath = os.path.join('%LOCALAPPDATA%','ownCloud')
 		cfgPath = os.path.expandvars(cfgPath)
 	else:
-		print 'unkown/not supported platform:', sys.platform
+		print 'Unkown/not supported platform:', sys.platform
 		sys.exit(1)
 	if DEBUG:
 		print 'getConfigPath:', cfgPath
@@ -198,7 +198,7 @@ def getConfigPath():
 
 def getConfig(args):
 	if DEBUG:
-		print 'from args: '
+		print 'From args: '
 		pargs = copy.copy(args)
 		if pargs['pass']:
 			pargs['pass'] = PASSWORD_SAFE
@@ -241,7 +241,7 @@ def getConfig(args):
 	#cmd line arguments win out over config files.
 	cfg.update(args)
 	if DEBUG:
-		print 'finished config file:'
+		print 'Finished config file:'
 		pcfg = copy.copy(cfg)
 		if pcfg['pass']:
 			pcfg['pass'] = PASSWORD_SAFE
@@ -252,20 +252,20 @@ def main(args):
 	if args['debug']:
 		global DEBUG
 		DEBUG = True
-		print 'turning debug on'
+		print 'Turning debug on'
 	cfg = getConfig(args)
 	try:
 		sync = ownCloudSync(cfg)
 	except KeyError:
 		exc_type, exc_value, exc_tb = sys.exc_info()
-		print 'sorry this option: %s is required, was not found in cfg file or on cmd line' % (exc_value)
+		print 'Sorry this option: %s is required, was not found in cfg file or on cmd line.' % (exc_value)
 		if DEBUG:
 			raise
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(
 		formatter_class=argparse.RawDescriptionHelpFormatter,
-		description = 'Synchronize files across machines using ownCloud DAV server',
+		description = 'Synchronize files across machines using ownCloud DAV server.',
 		epilog = """
 I support the ownCloud config file, which is located here:
   {cfg}
@@ -288,10 +288,10 @@ dst=clientsync
 
 Password options:
   *) You can specify on the cmd line: -p (not very safe)
-  *) in the envifonment variable: OCPASS
-  *) in the owncloud.cfg file as pass = <password>
-  the choice is yours, if you put it in the cfg file, be careful to 
-  make sure nobody but you can read the file. (0400/0600 file perms)
+  *) In the envifonment variable: OCPASS
+  *) In the owncloud.cfg file as pass = <password>
+  The choice is yours, if you put it in the cfg file, be careful to 
+  make sure nobody but you can read the file. (0400/0600 file perms).
 		""".format(cfg = os.path.join(getConfigPath(),'owncloud.cfg')),
 	)
 	v = "%s - repo: %s" % (VERSION.asString, VERSION.asHead)
@@ -299,24 +299,24 @@ Password options:
 		action='version', 
 		version = '%(prog)s ' + v)
 	parser.add_argument('-c', '--config', nargs='?', default = None,
-		help = "configuration to use.")
+		help = "Configuration to use.")
 	parser.add_argument('-u', '--user', nargs='?', default = None,
-		help = "username on server.")
+		help = "Username on server.")
 	parser.add_argument('--ssl', nargs='?', default = None,
 		dest = 'sslFingerprint',
 		help = "SSL fingerprint on server to accept.")
 	parser.add_argument('-p', '--pass', nargs='?',
-		help = "password on server. you can also store this in environment variable OCPASS")
+		help = "Password on server. You can also store this in environment variable OCPASS.")
 	parser.add_argument('--dry-run', action = 'store_true', default = False,
 		help = "Dry Run, do not actually execute command.")
 	parser.add_argument('--debug', action = 'store_true', default = False,
-		help = "print a bunch of debug info.")
+		help = "Print a bunch of debug info.")
 	parser.add_argument('-s', '--src', nargs='?',
 		default =  os.path.expanduser(os.path.join('~','ownCloud')),
-		 help = "local Directory to sync with")
+		 help = "Local Directory to sync with.")
 	parser.add_argument('-d', '--dst', nargs='?', default = 'clientsync',
-		help = "folder on server.")
+		help = "Folder on server.")
 	parser.add_argument('--url', nargs='?', default = None,
-		 help = "url to sync to.")
+		 help = "URL to sync to.")
 	args = vars(parser.parse_args())
 	main(args)
