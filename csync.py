@@ -8,6 +8,7 @@ import ctypes
 import re
 import pprint
 import copy
+import getpass
 
 import csynclib
 import version
@@ -36,7 +37,10 @@ def authCallback(prompt, buffer, bufferLength, echo, verify, userData):
 	if 'username' in prompt:
 		ret = USERNAME
 	elif 'password' in prompt:
-		ret = PASSWORD
+		if not PASSWORD:
+			ret = getpass.getpass('ownCloud password:')
+		else:
+			ret = PASSWORD
 	elif 'SSL' in prompt:
 		fingerprint = re.search("fingerprint: ([\\w\\d:]+)", prompt).group(1)
 		if fingerprint == SSLFINGERPRINT:
@@ -52,8 +56,9 @@ def authCallback(prompt, buffer, bufferLength, echo, verify, userData):
 		ctypes.memset(buffer+i, ord(ret[i]), 1)
 	if DEBUG:
 		buffString = ctypes.string_at(buffer, bufferLength)
-		if PASSWORD in buffString:
-			buffString = buffString.replace(PASSWORD, PASSWORD_SAFE)
+		if PASSWORD:
+			if PASSWORD in buffString:
+				buffString = buffString.replace(PASSWORD, PASSWORD_SAFE)
 		print 'returning:', buffString
 	return 0
 
@@ -190,7 +195,7 @@ def getConfigPath():
 		cfgPath = os.path.join('%LOCALAPPDATA%','ownCloud')
 		cfgPath = os.path.expandvars(cfgPath)
 	else:
-		print 'Unkown/not supported platform:', sys.platform
+		print 'Unkown/not supported platform %s, please file a bug report. ' % sys.platform
 		sys.exit(1)
 	if DEBUG:
 		print 'getConfigPath:', cfgPath
@@ -233,7 +238,8 @@ def getConfig(args):
 					pprint.pprint(pcfg)
 	cfg.setdefault('davPath', 'remote.php/webdav/')
 	cfg.setdefault('sslFingerprint' '')
-
+	cfg.setdefault('pass', None)
+	cfg.setdefault('user', getpass.getuser())
 	if os.environ.has_key('OCPASS'):
 		cfg['pass'] = os.environ['OCPASS']
 		if DEBUG:
@@ -290,6 +296,7 @@ Password options:
   *) You can specify on the cmd line: -p (not very safe)
   *) In the envifonment variable: OCPASS
   *) In the owncloud.cfg file as pass = <password>
+  *) Do none of the above, and it will prompt you for the password.
   The choice is yours, if you put it in the cfg file, be careful to 
   make sure nobody but you can read the file. (0400/0600 file perms).
 		""".format(cfg = os.path.join(getConfigPath(),'owncloud.cfg')),
@@ -305,7 +312,7 @@ Password options:
 	parser.add_argument('--ssl', nargs='?', default = None,
 		dest = 'sslFingerprint',
 		help = "SSL fingerprint on server to accept.")
-	parser.add_argument('-p', '--pass', nargs='?',
+	parser.add_argument('-p', '--pass', nargs='?', default = None,
 		help = "Password on server. You can also store this in environment variable OCPASS.")
 	parser.add_argument('--dry-run', action = 'store_true', default = False,
 		help = "Dry Run, do not actually execute command.")
