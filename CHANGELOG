@@ -1,0 +1,15 @@
+CHANGELOG
+=========
+
+version 0.2 (releaded 2013-03-12)
+-----------
+	* Lots of UI cleanup
+	* loads more error checking
+	* Works beyond the orignal author's machine.
+	* Thanks to Weuxel (https://github.com/Weuxel) for lots of documenation
+	and cleanup.
+	* Thanks to duck (https://github.com/duck) for lots of testing!
+
+version 0.1  (released 2013-03-09)
+-----------
+	* Initial release
