@@ -14,7 +14,12 @@ Requirements:
 * Python > 2.6 < 3 (patches welcome)
 * An ownCloud server to sync with. (Presumably you already have one of these.)
 
-usage: just run csync.py -h, and it will give you help.
+Installation:
+  standard python setup.py script.
+    python setup.py install
+It will create a new command called csync, and you can call that :)
+
+usage: just run csync -h, and it will give you help.
 
     usage: csync.py [-h] [-v] [-c [CONFIG]] [-u [USER]] [--ssl [SSLFINGERPRINT]]
                 [-p [PASS]] [--dry-run] [--debug] [-s [SRC]] [-d [DST]] [--url [URL]]
