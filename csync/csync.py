@@ -254,7 +254,7 @@ def getConfig(args):
 			pprint.pprint(pcfg)
 	return cfg
 
-def main(args):
+def startSync(args):
 	if args['debug']:
 		global DEBUG
 		DEBUG = True
@@ -268,7 +268,7 @@ def main(args):
 		if DEBUG:
 			raise
 
-if __name__ == '__main__':
+def main():
 	parser = argparse.ArgumentParser(
 		formatter_class=argparse.RawDescriptionHelpFormatter,
 		description = 'Synchronize files across machines using ownCloud DAV server.',
@@ -326,4 +326,7 @@ Password options:
 	parser.add_argument('--url', nargs='?', default = None,
 		 help = "URL to sync to.")
 	args = vars(parser.parse_args())
-	main(args)
+	startSync(args)
+
+if __name__ == '__main__':
+	main()
