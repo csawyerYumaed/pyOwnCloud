@@ -10,4 +10,5 @@ setup(
 		'console_scripts': [
             'csync = csync.csync:main',
         ],
+		}
 )
