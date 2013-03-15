@@ -10,7 +10,7 @@ if os.path.exists('/usr/lib/libocsync.so.0'):
 elif os.path.exists('/usr/lib64/libocsync.so.0'):
 	_libraries['/usr/lib/libocsync.so.0'] = CDLL('/usr/lib64/libocsync.so.0')
 else:
-	path = ctypes.util.find_library('libocsync')
+	path = ctypes.util.find_library('ocsync')
 	if path:
 		print 'Found libocsync @', path
 		_libraries['/usr/lib/libocsync.so.0'] = CDLL(path)
