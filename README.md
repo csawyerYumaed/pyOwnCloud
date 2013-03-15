@@ -8,6 +8,7 @@ other platforms should work, but are currently untested. This code is in no way 
 supported by ownCloud, all bugs should be reported here and not there.
 
 Requirements:
+-------------
 * The ocsync C library from ownCloud. If you install Mirall, you get it for free on Linux.  
 	If you don't want to install mirall, you can install the 'ocsync' binary package from the owncloud repo's.  
         So far we have only successfully tested against 0.70.4 of the libocsync library.
@@ -15,9 +16,11 @@ Requirements:
 * An ownCloud server to sync with. (Presumably you already have one of these.)
 
 Installation:
-  standard python setup.py script.
+-------------
+* standard python setup.py script.
+* It will create a new command called csync, and you can call that :)
+
     python setup.py install
-It will create a new command called csync, and you can call that :)
 
 usage: just run csync -h, and it will give you help.
 
