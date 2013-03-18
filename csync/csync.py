@@ -10,6 +10,11 @@ import pprint
 import copy
 import getpass
 
+try:
+	import keyring
+except:
+	keyring = None
+
 import csynclib
 import version
 VERSION = version.version
@@ -20,7 +25,7 @@ PASSWORD = ''
 PASSWORD_SAFE = '********'
 SSLFINGERPRINT = ''
 DEBUG = False
-
+NOT_USE_KEYRING = False
 
 def authCallback(prompt, buffer, bufferLength, echo, verify, userData):
 	"""
@@ -33,14 +38,22 @@ def authCallback(prompt, buffer, bufferLength, echo, verify, userData):
 	if DEBUG:
 		print 'authCallback:', prompt,  buffer,  bufferLength, echo, verify, userData
 		#print 'string:', ctypes.string_at(buffer, bufferLength-1)
-	ret = ''
+	ret = None
 	if 'username' in prompt:
 		ret = USERNAME
 	elif 'password' in prompt:
-		if not PASSWORD:
-			ret = getpass.getpass('ownCloud password:')
-		else:
-			ret = PASSWORD
+		print keyring, NOT_USE_KEYRING
+		if keyring and not NOT_USE_KEYRING:
+			print "using password from keyring"
+			ret = keyring.get_password('ownCloud', USERNAME)
+		if ret is None:
+			if not PASSWORD:
+				ret = getpass.getpass('ownCloud password:')
+			else:
+				ret = PASSWORD
+			if keyring and not NOT_USE_KEYRING:
+				print "saving password to keyring"
+				keyring.set_password('ownCloud', USERNAME, ret)
 	elif 'SSL' in prompt:
 		fingerprint = re.search("fingerprint: ([\\w\\d:]+)", prompt).group(1)
 		if fingerprint == SSLFINGERPRINT:
@@ -76,10 +89,11 @@ class ownCloudSync():
 	def __init__(self, cfg = None):
 		"""initialize"""
 		self.cfg = cfg
-		global USERNAME, PASSWORD, SSLFINGERPRINT
+		global USERNAME, PASSWORD, SSLFINGERPRINT, NOT_USE_KEYRING
 		USERNAME = cfg['user']
 		PASSWORD = cfg['pass']
 		SSLFINGERPRINT = cfg['sslFingerprint']
+		NOT_USE_KEYRING = cfg['not-use-keyring']
 		libVersion = csynclib.csync_version(0,40,1)
 		if DEBUG:
 			print 'libocsync version: ', libVersion
@@ -240,6 +254,7 @@ def getConfig(args):
 	cfg.setdefault('sslFingerprint' '')
 	cfg.setdefault('pass', None)
 	cfg.setdefault('user', getpass.getuser())
+	cfg.setdefault('not-use-keyring', False)
 	if os.environ.has_key('OCPASS'):
 		cfg['pass'] = os.environ['OCPASS']
 		if DEBUG:
@@ -297,9 +312,10 @@ Password options:
   *) In the envifonment variable: OCPASS
   *) In the owncloud.cfg file as pass = <password>
   *) Do none of the above, and it will prompt you for the password.
+  *) Use keyring to store passwords in a keyring. (keyring package is {keyring}installed).
   The choice is yours, if you put it in the cfg file, be careful to 
   make sure nobody but you can read the file. (0400/0600 file perms).
-		""".format(cfg = os.path.join(getConfigPath(),'owncloud.cfg')),
+		""".format(cfg = os.path.join(getConfigPath(),'owncloud.cfg'), keyring="" if keyring else "NOT "),
 	)
 	v = "%s - repo: %s" % (VERSION.asString, VERSION.asHead)
 	parser.add_argument('-v', '--version', 
@@ -325,6 +341,9 @@ Password options:
 		help = "Folder on server.")
 	parser.add_argument('--url', nargs='?', default = None,
 		 help = "URL to sync to.")
+	if keyring:
+		parser.add_argument('--not-use-keyring', action = 'store_true', default = False,
+				help = "use keyring if available to store password safely.")
 	args = vars(parser.parse_args())
 	startSync(args)
 
