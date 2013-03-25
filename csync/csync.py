@@ -92,7 +92,7 @@ class ownCloudSync():
 		global USERNAME, PASSWORD, SSLFINGERPRINT, NOT_USE_KEYRING
 		USERNAME = cfg['user']
 		PASSWORD = cfg['pass']
-		SSLFINGERPRINT = cfg['sslFingerprint']
+		SSLFINGERPRINT = cfg['sslfingerprint']
 		NOT_USE_KEYRING = cfg['not-use-keyring']
 		libVersion = csynclib.csync_version(0,40,1)
 		if DEBUG:
@@ -251,7 +251,7 @@ def getConfig(args):
 					pcfg['pass'] = PASSWORD_SAFE
 					pprint.pprint(pcfg)
 	cfg.setdefault('davPath', 'remote.php/webdav/')
-	cfg.setdefault('sslFingerprint' '')
+	cfg.setdefault('sslfingerprint' '')
 	cfg.setdefault('pass', None)
 	cfg.setdefault('user', getpass.getuser())
 	cfg.setdefault('not-use-keyring', False)
@@ -295,7 +295,7 @@ I support the following keys in the cfg  file:
 	user: The username on the ownCloud server
 	url: the url of the ownCloud Server
 	pass: the password on the ownCloud server
-	sslFingerprint: a valid SSL fingerprint for the server.
+	sslfingerprint: a valid SSL fingerprint for the server.
 	src: local directory to sync against.
 	dst: folder on the server to sync against.
 complete example:
@@ -303,7 +303,7 @@ complete example:
 user=awesomeSauce
 pass=PasswordThisIsSuperSuperSecretReallyISwearLOL
 url=https://www.example.org/owncloud/
-sslFingerprint=
+sslfingerprint=
 src=/home/awesomeSauce/ownCloud
 dst=clientsync
 
@@ -326,7 +326,7 @@ Password options:
 	parser.add_argument('-u', '--user', nargs='?', default = None,
 		help = "Username on server.")
 	parser.add_argument('--ssl', nargs='?', default = None,
-		dest = 'sslFingerprint',
+		dest = 'sslfingerprint',
 		help = "SSL fingerprint on server to accept.")
 	parser.add_argument('-p', '--pass', nargs='?', default = None,
 		help = "Password on server. You can also store this in environment variable OCPASS.")
