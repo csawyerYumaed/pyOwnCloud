@@ -6,6 +6,9 @@ setup(
     name = "pyOwnCloud",
     version = ver.version.asFloat,
     packages = find_packages(),
+	package_data = {
+		'csync': [ 'version.dat'],
+	},
 	entry_points = {
 		'console_scripts': [
             'csync = csync.csync:main',
