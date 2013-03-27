@@ -10,8 +10,8 @@ supported by ownCloud, all bugs should be reported here and not there.
 Support/Discussion:
 -------------------
 
-* use github for issues/patches/etc: https://github.com/csawyerYumaed/pyOwnCloud
-* For Discussion use the google group/forum thingy: https://groups.google.com/forum/?hl=en&fromgroups#!forum/pyowncloud
+* Use github for issues/patches/etc: https://github.com/csawyerYumaed/pyOwnCloud
+* For discussion use: http://lists.cknow.org/listinfo.cgi/pyowncloud-cknow.org (pyowncloud <@> lists.cknow.org)
 
 Requirements:
 -------------
