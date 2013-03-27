@@ -64,7 +64,7 @@ usage: just run csync -h, and it will give you help.
     user=awesomeSauce
     pass=PasswordThisIsSuperSuperSecretReallyISwearLOL
     url=https://www.example.org/owncloud/
-    sslFingerprint=
+    sslfingerprint=
     src=/home/awesomeSauce/ownCloud
     dst=clientsync
     
