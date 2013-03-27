@@ -7,6 +7,12 @@ This code is now in production use, and has been tested against a variety of Lin
 other platforms should work, but are currently untested. This code is in no way currently endorsed or
 supported by ownCloud, all bugs should be reported here and not there.
 
+Support/Discussion:
+-------------------
+
+* use github for issues/patches/etc: https://github.com/csawyerYumaed/pyOwnCloud
+* For Discussion use the google group/forum thingy: https://groups.google.com/forum/?hl=en&fromgroups#!forum/pyowncloud
+
 Requirements:
 -------------
 * The ocsync C library from ownCloud. If you install Mirall, you get it for free on Linux.  
