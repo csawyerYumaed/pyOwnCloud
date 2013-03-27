@@ -50,7 +50,7 @@ usage: just run csync -h, and it will give you help.
     --dry-run             Dry Run, do not actually execute command.
     --debug               Print a bunch of debug info.
     -s [SRC], --src [SRC]
-                          Local Directory to sync with.
+                          Local directory to sync with.
     -d [DST], --dst [DST]
                           Folder on server.
     --url [URL]           URL to sync to.
@@ -62,7 +62,7 @@ usage: just run csync -h, and it will give you help.
     	    user: The username on the ownCloud server
     	    url: the url of the ownCloud Server
     	    pass: the password on the ownCloud server
-    	    sslFingerprint: a valid SSL fingerprint for the server.
+    	    sslfingerprint: a valid SSL fingerprint for the server.
     	    src: local directory to sync against.
     	    dst: folder on the server to sync against.
     complete example:
@@ -76,7 +76,7 @@ usage: just run csync -h, and it will give you help.
     
     Password options:
      *) You can specify on the cmd line: -p (not very safe)
-     *) In the envifonment variable: OCPASS
+     *) In the environment variable: OCPASS
      *) In the owncloud.cfg file as pass = <password>
      *) Do none of the above, and it will prompt you for the password.
      The choice is yours, if you put it in the cfg file, be careful to 
