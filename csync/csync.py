@@ -25,7 +25,7 @@ PASSWORD = ''
 PASSWORD_SAFE = '********'
 SSLFINGERPRINT = ''
 DEBUG = False
-NOT_USE_KEYRING = False
+USE_KEYRING = False
 
 def authCallback(prompt, buffer, bufferLength, echo, verify, userData):
 	"""
@@ -42,7 +42,7 @@ def authCallback(prompt, buffer, bufferLength, echo, verify, userData):
 	if 'username' in prompt:
 		ret = USERNAME
 	elif 'password' in prompt:
-		if keyring and not NOT_USE_KEYRING:
+		if keyring and USE_KEYRING:
 			print "using password from keyring"
 			ret = keyring.get_password('ownCloud', USERNAME)
 		if ret is None:
@@ -50,7 +50,7 @@ def authCallback(prompt, buffer, bufferLength, echo, verify, userData):
 				ret = getpass.getpass('ownCloud password:')
 			else:
 				ret = PASSWORD
-			if keyring and not NOT_USE_KEYRING:
+			if keyring and USE_KEYRING:
 				print "saving password to keyring"
 				keyring.set_password('ownCloud', USERNAME, ret)
 	elif 'SSL' in prompt:
@@ -88,11 +88,11 @@ class ownCloudSync():
 	def __init__(self, cfg = None):
 		"""initialize"""
 		self.cfg = cfg
-		global USERNAME, PASSWORD, SSLFINGERPRINT, NOT_USE_KEYRING
+		global USERNAME, PASSWORD, SSLFINGERPRINT, USE_KEYRING
 		USERNAME = cfg['user']
 		PASSWORD = cfg['pass']
 		SSLFINGERPRINT = cfg['sslfingerprint']
-		NOT_USE_KEYRING = cfg['not-use-keyring']
+		USE_KEYRING = cfg['use-keyring']
 		libVersion = csynclib.csync_version(0,40,1)
 		if DEBUG:
 			print 'libocsync version: ', libVersion
@@ -341,7 +341,7 @@ Password options:
 	parser.add_argument('--url', nargs='?', default = None,
 		 help = "URL to sync to.")
 	if keyring:
-		parser.add_argument('--not-use-keyring', action = 'store_true', default = False,
+		parser.add_argument('--use-keyring', action = 'store_true', default = False,
 				help = "use keyring if available to store password safely.")
 	args = vars(parser.parse_args())
 	startSync(args)
