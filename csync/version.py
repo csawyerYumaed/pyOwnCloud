@@ -1,6 +1,6 @@
 import subprocess
 import json
-
+import os
 class ver(object):
 	def __init__(self, verfile='version.dat'):
 		self.verfile = verfile
@@ -15,6 +15,9 @@ class ver(object):
 	@property
 	def asString(self):
 		return self.version['string']
+	@property
+	def asHead(self):
+		return self.version['head']
 	def makeString(self):
 		s = str(self.asFloat)
 		#s = s.replace('.','_')
@@ -107,7 +110,11 @@ class gitVersion(ver):
 	def asHead(self):
 		return self.getHeadVersion()
 
-version = gitVersion()
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+if os.path.exists(os.path.join(BASE_DIR, 'devel')):
+    version = gitVersion(os.path.join(BASE_DIR, 'version.dat'))
+else:
+    version = ver(os.path.join(BASE_DIR, 'version.dat'))
 
 
 if __name__ == '__main__':
