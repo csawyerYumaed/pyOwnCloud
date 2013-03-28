@@ -42,7 +42,6 @@ def authCallback(prompt, buffer, bufferLength, echo, verify, userData):
 	if 'username' in prompt:
 		ret = USERNAME
 	elif 'password' in prompt:
-		print keyring, NOT_USE_KEYRING
 		if keyring and not NOT_USE_KEYRING:
 			print "using password from keyring"
 			ret = keyring.get_password('ownCloud', USERNAME)
