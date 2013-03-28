@@ -246,9 +246,9 @@ def getConfig(args):
 			if DEBUG:
 				print 'conifguration info received from %s:' % cfgFile
 				pcfg = copy.copy(cfg)
-				if pcfg['pass']:
+				if pcfg.has_key('pass'):
 					pcfg['pass'] = PASSWORD_SAFE
-					pprint.pprint(pcfg)
+				pprint.pprint(pcfg)
 	cfg.setdefault('davPath', 'remote.php/webdav/')
 	cfg.setdefault('sslfingerprint' '')
 	cfg.setdefault('pass', None)
@@ -263,9 +263,9 @@ def getConfig(args):
 	if DEBUG:
 		print 'Finished config file:'
 		pcfg = copy.copy(cfg)
-		if pcfg['pass']:
+		if pcfg.has_key('pass'):
 			pcfg['pass'] = PASSWORD_SAFE
-			pprint.pprint(pcfg)
+		pprint.pprint(pcfg)
 	return cfg
 
 def startSync(args):
