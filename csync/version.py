@@ -88,6 +88,9 @@ class gitVersion(ver):
 		"""if git is around, return the current version and save it.
 		otherwise return the saved copy, or 00 if not already saved.
 		"""
+		gitdir = os.path.join(os.path.dirname(os.path.abspath(self.verfile)),'.git')
+		if not os.path.exists(gitdir):
+			return '00'
 		cmd = 'git rev-parse --verify HEAD'.split()
 		try:
 			out = subprocess.check_output(cmd)
