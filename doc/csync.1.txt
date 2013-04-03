@@ -67,7 +67,7 @@ CONFIGURATION FILE
 ------------------
 
 The csync configuration file can be found in '$HOME/.local/share/data/ownCloud/owncloud.cfg'.
-Only the *ownCloud* section is supported. This file is also ued by the normal owncloud-client.
+Only the *ownCloud* section is supported. This file is also used by the normal owncloud-client.
 
 Supported keys in the cfg file:
 
