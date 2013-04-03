@@ -1,16 +1,16 @@
-csync(1)
+oclient(1)
 ========
 
 NAME
 ----
 
-csync - ownCloud CLI client written in python
+oclient - ownCloud CLI client written in python
 
 
 SYNOPSIS
 --------
 
-*csync* [-h] [-v] [-c 'CONFIG'] [-u 'USER'] [--ssl 'SSLFINGERPRINT']
+*oclient* [-h] [-v] [-c 'CONFIG'] [-u 'USER'] [--ssl 'SSLFINGERPRINT']
         [-p 'PASS'] [--dry-run] [--debug] [-s 'SRC'] [-d 'DST']
         [--url 'URL'] [--use-keyring]
 
@@ -66,7 +66,8 @@ OPTIONS
 CONFIGURATION FILE
 ------------------
 
-The csync configuration file can be found in '$HOME/.local/share/data/ownCloud/owncloud.cfg'.
+The oclient configuration file can be found in '$HOME/.local/share/data/ownCloud/owncloud.cfg'.
+
 Only the *ownCloud* section is supported. This file is also used by the normal owncloud-client.
 
 Supported keys in the cfg file:
