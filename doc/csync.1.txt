@@ -1,0 +1,124 @@
+csync(1)
+========
+
+NAME
+----
+
+csync - ownCloud CLI client written in python
+
+
+SYNOPSIS
+--------
+
+*csync* [-h] [-v] [-c 'CONFIG'] [-u 'USER'] [--ssl 'SSLFINGERPRINT']
+        [-p 'PASS'] [--dry-run] [--debug] [-s 'SRC'] [-d 'DST']
+        [--url 'URL'] [--use-keyring]
+
+
+DESCRIPTION
+-----------
+
+Syncing files across machines using ownCloud DAV server.
+
+.Password options:
+- You can specify on the cmd line: *-p* (not very safe)
+- In the environment variable: 'OCPASS'
+- In the owncloud.cfg file as *pass = '<password>'*
+- Use keyring to store passwords in a keyring (needs Python Keyring Lib to be installed)
+- Do none of the above, and it will prompt you for the password
+
+The choice is yours, if you put it in the cfg file, be careful to
+make sure nobody but you can read the file. (0400/0600 file perms).
+
+OPTIONS
+-------
+
+*-c 'CONFIG', --config 'CONFIG'*::
+    Configuration file to use
+
+*-u 'USER', --user 'USER'*::
+    Username on the ownCloud server
+*-p 'PASS', --pass 'PASS'*::
+    Password on the ownCloud server
+    ( You can also store this in environment variable 'OCPASS' )
+
+*-s 'SRC', --src 'SRC'*::
+    Local directory to sync against
+*-d 'DST', --dst 'DST'*::
+    Folder on server to sync against
+
+*--url 'URL'*::
+    URL of the ownCloud server
+*--ssl 'SSLFINGERPRINT'*::
+    valid SSL fingerprint for the ownCloud server
+
+*--use-keyring*::
+    use keyring if available to store password safely (Needs Python Keyring Lib to be installed)
+*--dry-run*::
+    Dry Run, do not actually execute command
+*--debug*::
+    Print a bunch of debug info
+*-h, --help*::
+    show help message and exit
+*-v, --version*::
+    show program's version number and exit
+
+CONFIGURATION FILE
+------------------
+
+The csync configuration file can be found in '$HOME/.local/share/data/ownCloud/owncloud.cfg'.
+Only the *ownCloud* section is supported. This file is also ued by the normal owncloud-client.
+
+Supported keys in the cfg file:
+
+*user*::
+    username on the ownCloud server
+
+*pass*::
+    password on the ownCloud server
+
+*url*::
+    url of the ownCloud server
+
+*sslfingerprint*::
+    valid SSL fingerprint for the ownCloud server
+
+*src*::
+    local directory to sync against
+
+*dst*::
+    folder on the server to sync against
+
+A complete example:
+
+    [ownCloud]
+    user=awesomeSauce
+    pass=PasswordThisIsSuperSuperSecretReallyISwearLOL
+    url=https://www.example.org/owncloud/
+    sslfingerprint=
+    src=/home/awesomeSauce/ownCloud
+    dst=clientsync
+
+BUGS
+----
+
+Please report bugs at https://github.com/csawyerYumaed/pyOwnCloud/issues.
+
+
+SEE ALSO
+--------
+
+*libcsync*(7)
+
+
+AUTHORS
+-------
+
+pyOwnCloud Team <pyowncloud@lists.cknow.org>
+
+
+COPYING
+-------
+Copyright (c) 2013 pyOwnCloud Team. Free use of this software is
+granted under the terms of the GNU General Public License 2 (GPL-2).
+

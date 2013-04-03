@@ -1,0 +1,228 @@
+'\" t
+.\"     Title: csync
+.\"    Author: [see the "AUTHORS" section]
+.\" Generator: DocBook XSL Stylesheets v1.76.1 <http://docbook.sf.net/>
+.\"      Date: 04/03/2013
+.\"    Manual: \ \&
+.\"    Source: \ \&
+.\"  Language: English
+.\"
+.TH "CSYNC" "1" "04/03/2013" "\ \&" "\ \&"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+csync \- ownCloud CLI client written in python
+.SH "SYNOPSIS"
+.sp
+\fBcsync\fR [\-h] [\-v] [\-c \fICONFIG\fR] [\-u \fIUSER\fR] [\-\-ssl \fISSLFINGERPRINT\fR] [\-p \fIPASS\fR] [\-\-dry\-run] [\-\-debug] [\-s \fISRC\fR] [\-d \fIDST\fR] [\-\-url \fIURL\fR] [\-\-use\-keyring]
+.SH "DESCRIPTION"
+.sp
+Syncing files across machines using ownCloud DAV server\&.
+.PP
+\fBPassword options:\fR
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+You can specify on the cmd line:
+\fB\-p\fR
+(not very safe)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+In the environment variable:
+\fIOCPASS\fR
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+In the owncloud\&.cfg file as
+\fBpass = \fR\fB\fI<password>\fR\fR
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Use keyring to store passwords in a keyring (needs Python Keyring Lib to be installed)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Do none of the above, and it will prompt you for the password
+.RE
+.sp
+The choice is yours, if you put it in the cfg file, be careful to make sure nobody but you can read the file\&. (0400/0600 file perms)\&.
+.SH "OPTIONS"
+.PP
+\fB\-c \fR\fB\fICONFIG\fR\fR\fB, \-\-config \fR\fB\fICONFIG\fR\fR
+.RS 4
+Configuration file to use
+.RE
+.PP
+\fB\-u \fR\fB\fIUSER\fR\fR\fB, \-\-user \fR\fB\fIUSER\fR\fR
+.RS 4
+Username on the ownCloud server
+.RE
+.PP
+\fB\-p \fR\fB\fIPASS\fR\fR\fB, \-\-pass \fR\fB\fIPASS\fR\fR
+.RS 4
+Password on the ownCloud server ( You can also store this in environment variable
+\fIOCPASS\fR
+)
+.RE
+.PP
+\fB\-s \fR\fB\fISRC\fR\fR\fB, \-\-src \fR\fB\fISRC\fR\fR
+.RS 4
+Local directory to sync against
+.RE
+.PP
+\fB\-d \fR\fB\fIDST\fR\fR\fB, \-\-dst \fR\fB\fIDST\fR\fR
+.RS 4
+Folder on server to sync against
+.RE
+.PP
+\fB\-\-url \fR\fB\fIURL\fR\fR
+.RS 4
+URL of the ownCloud server
+.RE
+.PP
+\fB\-\-ssl \fR\fB\fISSLFINGERPRINT\fR\fR
+.RS 4
+valid SSL fingerprint for the ownCloud server
+.RE
+.PP
+\fB\-\-use\-keyring\fR
+.RS 4
+use keyring if available to store password safely (Needs Python Keyring Lib to be installed)
+.RE
+.PP
+\fB\-\-dry\-run\fR
+.RS 4
+Dry Run, do not actually execute command
+.RE
+.PP
+\fB\-\-debug\fR
+.RS 4
+Print a bunch of debug info
+.RE
+.PP
+\fB\-h, \-\-help\fR
+.RS 4
+show help message and exit
+.RE
+.PP
+\fB\-v, \-\-version\fR
+.RS 4
+show program\(cqs version number and exit
+.RE
+.SH "CONFIGURATION FILE"
+.sp
+The csync configuration file can be found in \fI$HOME/\&.local/share/data/ownCloud/owncloud\&.cfg\fR\&. Only the \fBownCloud\fR section is supported\&. This file is also ued by the normal owncloud\-client\&.
+.sp
+Supported keys in the cfg file:
+.PP
+\fBuser\fR
+.RS 4
+username on the ownCloud server
+.RE
+.PP
+\fBpass\fR
+.RS 4
+password on the ownCloud server
+.RE
+.PP
+\fBurl\fR
+.RS 4
+url of the ownCloud server
+.RE
+.PP
+\fBsslfingerprint\fR
+.RS 4
+valid SSL fingerprint for the ownCloud server
+.RE
+.PP
+\fBsrc\fR
+.RS 4
+local directory to sync against
+.RE
+.PP
+\fBdst\fR
+.RS 4
+folder on the server to sync against
+.RE
+.sp
+A complete example:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+[ownCloud]
+user=awesomeSauce
+pass=PasswordThisIsSuperSuperSecretReallyISwearLOL
+url=https://www\&.example\&.org/owncloud/
+sslfingerprint=
+src=/home/awesomeSauce/ownCloud
+dst=clientsync
+.fi
+.if n \{\
+.RE
+.\}
+.SH "BUGS"
+.sp
+Please report bugs at https://github\&.com/csawyerYumaed/pyOwnCloud/issues\&.
+.SH "SEE ALSO"
+.sp
+\fBlibcsync\fR(7)
+.SH "AUTHORS"
+.sp
+pyOwnCloud Team <pyowncloud@lists\&.cknow\&.org>
+.SH "COPYING"
+.sp
+Copyright (c) 2013 pyOwnCloud Team\&. Free use of this software is granted under the terms of the GNU General Public License 2 (GPL\-2)\&.
