@@ -1,6 +1,10 @@
 import subprocess
 import json
 import os
+import pkg_resources
+
+verfile = pkg_resources.resource_filename(__name__, 'version.dat')
+
 class ver(object):
 	def __init__(self, verfile='version.dat'):
 		self.verfile = verfile
@@ -88,8 +92,10 @@ class gitVersion(ver):
 		"""if git is around, return the current version and save it.
 		otherwise return the saved copy, or 00 if not already saved.
 		"""
-		gitdir = os.path.join(os.path.dirname(os.path.abspath(self.verfile)),'.git')
+		gitdir = os.path.join(os.path.dirname(os.path.abspath(self.verfile)),'..','.git')
 		if not os.path.exists(gitdir):
+			if self.version.has_key('head'):
+				return self.version['head']
 			return '00'
 		cmd = 'git rev-parse --verify HEAD'.split()
 		try:
@@ -113,12 +119,13 @@ class gitVersion(ver):
 	def asHead(self):
 		return self.getHeadVersion()
 
-BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-if os.path.exists(os.path.join(BASE_DIR, 'devel')):
-    version = gitVersion(os.path.join(BASE_DIR, 'version.dat'))
-else:
-    version = ver(os.path.join(BASE_DIR, 'version.dat'))
+#BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+#if os.path.exists(os.path.join(BASE_DIR, 'devel')):
+#    version = gitVersion(os.path.join(BASE_DIR, 'version.dat'))
+#else:
+#    version = ver(os.path.join(BASE_DIR, 'version.dat'))
 
+version = gitVersion(verfile)
 
 if __name__ == '__main__':
 	print 'Testing version.'
