@@ -15,8 +15,8 @@ Support/Discussion:
 
 Requirements:
 -------------
-* The ocsync C library from ownCloud. If you install Mirall, you get it for free on Linux.  
-	If you don't want to install mirall, you can install the 'ocsync' binary package from the owncloud repo's.  
+* The ocsync C library from ownCloud. If you install Mirall, you get it for free on Linux.
+	If you don't want to install mirall, you can install the 'ocsync' binary package from the owncloud repo's.
         So far we have only successfully tested against 0.70.4 of the libocsync library.
 * Python > 2.6 < 3 (patches welcome)
 * An ownCloud server to sync with. (Presumably you already have one of these.)
@@ -31,7 +31,8 @@ Installation:
 usage: just run csync -h, and it will give you help.
 
     usage: csync.py [-h] [-v] [-c [CONFIG]] [-u [USER]] [--ssl [SSLFINGERPRINT]]
-                [-p [PASS]] [--dry-run] [--debug] [-s [SRC]] [-d [DST]] [--url [URL]]
+                [-p [PASS]] [--dry-run] [--debug] [-s [SRC]] [-d [DST]]
+                [--url [URL]] [--use-keyring]
     
     Synchronize files across machines using ownCloud DAV server.
     
@@ -54,6 +55,7 @@ usage: just run csync -h, and it will give you help.
     -d [DST], --dst [DST]
                           Folder on server.
     --url [URL]           URL to sync to.
+    --use-keyring         use keyring if available to store password safely.
     
     I support the ownCloud config file, which is located here:
         $HOME/.local/share/data/ownCloud/owncloud.cfg
@@ -79,5 +81,6 @@ usage: just run csync -h, and it will give you help.
      *) In the environment variable: OCPASS
      *) In the owncloud.cfg file as pass = <password>
      *) Do none of the above, and it will prompt you for the password.
-     The choice is yours, if you put it in the cfg file, be careful to 
+     *) Use keyring to store passwords in a keyring. (needs Python Keyring Lib to be installed).
+     The choice is yours, if you put it in the cfg file, be careful to
      make sure nobody but you can read the file. (0400/0600 file perms).
