@@ -11,7 +11,7 @@ setup(
 	},
 	entry_points = {
 		'console_scripts': [
-			'csync = csync.csync:main',
+			'oclient = csync.csync:main',
 		],
 	},
 	extras_require = {

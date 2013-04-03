@@ -28,9 +28,9 @@ Installation:
 
     python setup.py install
 
-usage: just run csync -h, and it will give you help.
+usage: just run oclient -h, and it will give you help.
 
-    usage: csync.py [-h] [-v] [-c [CONFIG]] [-u [USER]] [--ssl [SSLFINGERPRINT]]
+    usage: oclient.py [-h] [-v] [-c [CONFIG]] [-u [USER]] [--ssl [SSLFINGERPRINT]]
                 [-p [PASS]] [--dry-run] [--debug] [-s [SRC]] [-d [DST]]
                 [--url [URL]] [--use-keyring]
     
