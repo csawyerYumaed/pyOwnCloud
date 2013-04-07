@@ -223,9 +223,12 @@ def getConfig(args):
 		pprint.pprint(pargs)
 	newArgs = {}
 	for k, v in args.iteritems():
+		if k == "use_keyring":
+			k = "use-keyring"
 		if v:
 			newArgs[k] = v
 	args = newArgs
+	print args
 	cfg = {}
 	cfgFile = None
 	if args.has_key('config'):
@@ -253,7 +256,7 @@ def getConfig(args):
 	cfg.setdefault('sslfingerprint' '')
 	cfg.setdefault('pass', None)
 	cfg.setdefault('user', getpass.getuser())
-	cfg.setdefault('not-use-keyring', False)
+	cfg.setdefault('use-keyring', False)
 	if os.environ.has_key('OCPASS'):
 		cfg['pass'] = os.environ['OCPASS']
 		if DEBUG:
