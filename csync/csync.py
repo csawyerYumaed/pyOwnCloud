@@ -92,7 +92,7 @@ class ownCloudSync():
 		USERNAME = cfg['user']
 		PASSWORD = cfg['pass']
 		SSLFINGERPRINT = cfg['sslfingerprint']
-		USE_KEYRING = cfg['use-keyring']
+		USE_KEYRING = cfg['use_keyring']
 		libVersion = csynclib.csync_version(0,40,1)
 		if DEBUG:
 			print 'libocsync version: ', libVersion
@@ -253,7 +253,7 @@ def getConfig(args):
 	cfg.setdefault('sslfingerprint' '')
 	cfg.setdefault('pass', None)
 	cfg.setdefault('user', getpass.getuser())
-	cfg.setdefault('not-use-keyring', False)
+	cfg.setdefault('use_keyring', False)
 	if os.environ.has_key('OCPASS'):
 		cfg['pass'] = os.environ['OCPASS']
 		if DEBUG:
