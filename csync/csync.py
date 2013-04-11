@@ -106,7 +106,7 @@ class ownCloudSync():
 			self.cfg['url'],
 			USERNAME,
 			)
-		if cfg.has_key('dry_run'):
+		if cfg.has_key('dry_run') and cfg['dry_run']:
 			return
 		self.sync()
 
@@ -214,7 +214,8 @@ def getConfigPath():
 		print 'getConfigPath:', cfgPath
 	return cfgPath
 
-def getConfig(args):
+def getConfig(parser):
+	args = vars(parser.parse_args())
 	if DEBUG:
 		print 'From args: '
 		pargs = copy.copy(args)
@@ -259,6 +260,8 @@ def getConfig(args):
 		if DEBUG:
 			print 'password coming from environment'
 	#cmd line arguments win out over config files.
+	parser.set_defaults(**cfg)
+	args = vars(parser.parse_args())
 	cfg.update(args)
 	if DEBUG:
 		print 'Finished config file:'
@@ -268,14 +271,10 @@ def getConfig(args):
 		pprint.pprint(pcfg)
 	return cfg
 
-def startSync(args):
-	if args['debug']:
-		global DEBUG
-		DEBUG = True
-		print 'Turning debug on'
-	cfg = getConfig(args)
+def startSync(parser):
+	cfg = getConfig(parser)
 	try:
-		sync = ownCloudSync(cfg)
+		ownCloudSync(cfg)
 	except KeyError:
 		exc_type, exc_value, exc_tb = sys.exc_info()
 		print 'Sorry this option: %s is required, was not found in cfg file or on cmd line.' % (exc_value)
@@ -343,8 +342,15 @@ Password options:
 	if keyring:
 		parser.add_argument('--use-keyring', action = 'store_true', default = False,
 				help = "use keyring if available to store password safely.")
+
 	args = vars(parser.parse_args())
-	startSync(args)
+	if args['debug']:
+		global DEBUG
+		DEBUG = True
+		print 'Turning debug on'
+	startSync(parser)
 
 if __name__ == '__main__':
 	main()
+
+# vim: noet:ts=4:sw=4:sts=4
