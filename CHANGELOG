@@ -1,8 +1,11 @@
 CHANGELOG
 =========
 
-version 0.3 (unreleased - this updated to 20655515dedf8495f2701ec045b6b5c5e0dad25c [2065551])
+version 0.3 (released 2013-04-15)
 	* binary command is now called oclient.
+	* Manpage created.
+	* keyring bugfixes.
+	* tested against 0.70.5 ccynclibrary version.
     * will prompt for password if not specified in other ways.
 	* has a setup.py and can be properly 'packaged' now.  
 	* better finding of the csync C library
@@ -12,7 +15,7 @@ version 0.3 (unreleased - this updated to 20655515dedf8495f2701ec045b6b5c5e0dad2
 	* fixed how we handle versioning to be better.
 
 
-version 0.2 (releaded 2013-03-12)
+version 0.2 (releaded 20/Users/zie/wk/owncloud/pyOwnCloud/CHANGELOG13-03-12)
 -----------
 	* Lots of UI cleanup
 	* loads more error checking
