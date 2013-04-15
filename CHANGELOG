@@ -5,8 +5,8 @@ version 0.3 (released 2013-04-15)
 	* binary command is now called oclient.
 	* Manpage created.
 	* keyring bugfixes.
-	* tested against 0.70.5 ccynclibrary version.
-    * will prompt for password if not specified in other ways.
+	* tested against version 0.70.5 of csync library.
+	* will prompt for password if not specified in other ways.
 	* has a setup.py and can be properly 'packaged' now.  
 	* better finding of the csync C library
 	* uses python-keyring to use the same passwords as the owncloud-client if
@@ -15,7 +15,7 @@ version 0.3 (released 2013-04-15)
 	* fixed how we handle versioning to be better.
 
 
-version 0.2 (releaded 20/Users/zie/wk/owncloud/pyOwnCloud/CHANGELOG13-03-12)
+version 0.2 (released 2013-03-12)
 -----------
 	* Lots of UI cleanup
 	* loads more error checking
