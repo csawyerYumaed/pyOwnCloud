@@ -24,7 +24,7 @@ Requirements:
 Installation:
 -------------
 * standard python setup.py script.
-* It will create a new command called csync, and you can call that :)
+* It will create a new command called oclient, and you can call that :)
 
     python setup.py install
 
