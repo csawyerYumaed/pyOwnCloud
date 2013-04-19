@@ -17,7 +17,7 @@ Requirements:
 -------------
 * The ocsync C library from ownCloud. If you install Mirall, you get it for free on Linux.
 	If you don't want to install mirall, you can install the 'ocsync' binary package from the owncloud repo's.
-        So far we have only successfully tested against 0.70.4 of the libocsync library.
+        So far we have successfully tested against 0.70.4 and 0.70.5 of the libocsync library.
 * Python > 2.6 < 3 (patches welcome)
 * An ownCloud server to sync with. (Presumably you already have one of these.)
 
