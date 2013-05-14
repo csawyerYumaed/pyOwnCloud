@@ -29,16 +29,16 @@ Installation:
     python setup.py install
 
 usage: just run oclient -h, and it will give you help.
-
-    usage: oclient.py [-h] [-v] [-c [CONFIG]] [-u [USER]] [--ssl [SSLFINGERPRINT]]
-                [-p [PASS]] [--dry-run] [--debug] [-s [SRC]] [-d [DST]]
-                [--url [URL]] [--use-keyring]
+    
+    usage: oclient [-h] [-v] [-c [CONFIG]] [-u [USER]] [--ssl [SSLFINGERPRINT]]
+                   [-p [PASS]] [--dry-run] [--debug] [-s [SRC]] [-d [DST]]
+                   [--url [URL]] [--use-keyring]
     
     Synchronize files across machines using ownCloud DAV server.
     
     optional arguments:
-    -h, --help            show this help message and exit
-    -v, --version         show program's version number and exit
+    -h, --help            Show this help message and exit
+    -v, --version         Show program's version number and exit
     -c [CONFIG], --config [CONFIG]
                           Configuration to use.
     -u [USER], --user [USER]
@@ -51,22 +51,24 @@ usage: just run oclient -h, and it will give you help.
     --dry-run             Dry Run, do not actually execute command.
     --debug               Print a bunch of debug info.
     -s [SRC], --src [SRC]
-                          Local directory to sync with.
+                          Local Directory to sync with.
     -d [DST], --dst [DST]
                           Folder on server.
     --url [URL]           URL to sync to.
     --use-keyring         use keyring if available to store password safely.
+
     
-    I support the ownCloud config file, which is located here:
+    oclient supports the ownCloud config file, which is located here:
         $HOME/.local/share/data/ownCloud/owncloud.cfg
-    I only support the 'ownCloud' section of the config.
-    I support the following keys in the cfg  file:
-    	    user: The username on the ownCloud server
-    	    url: the url of the ownCloud Server
-    	    pass: the password on the ownCloud server
-    	    sslfingerprint: a valid SSL fingerprint for the server.
-    	    src: local directory to sync against.
-    	    dst: folder on the server to sync against.
+    oclient only supports the 'ownCloud' section of the config.
+    oclient supports the following keys in the cfg  file:
+    	user: username on the ownCloud server
+    	pass: password on the ownCloud server
+    	url: url of the ownCloud server
+    	sslfingerprint: valid SSL fingerprint for the server
+    	src: local directory to sync against
+    	dst: folder on the server to sync against
+    
     complete example:
     [ownCloud]
     user=awesomeSauce
@@ -81,6 +83,7 @@ usage: just run oclient -h, and it will give you help.
      *) In the environment variable: OCPASS
      *) In the owncloud.cfg file as pass = <password>
      *) Do none of the above, and it will prompt you for the password.
-     *) Use keyring to store passwords in a keyring. (needs Python Keyring Lib to be installed).
+     *) Use keyring to store passwords in a keyring. (needs Python Keyring Lib to be installed)
+     
      The choice is yours, if you put it in the cfg file, be careful to
      make sure nobody but you can read the file. (0400/0600 file perms).
