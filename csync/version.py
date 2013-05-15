@@ -2,6 +2,9 @@ import subprocess
 import json
 import os
 import pkg_resources
+import locale
+
+encoding = locale.getdefaultlocale()[1]
 
 verfile = pkg_resources.resource_filename(__name__, 'version.dat')
 
@@ -76,7 +79,7 @@ class hgVersion(ver):
 			self.version['head'] = ver
 			self.saveVersion()
 		else:
-			if self.version.has_key('head'):
+			if head in self.version:
 				ver = self.version['head']
 			else:
 				ver = '00'
@@ -94,7 +97,7 @@ class gitVersion(ver):
 		"""
 		gitdir = os.path.join(os.path.dirname(os.path.abspath(self.verfile)),'..','.git')
 		if not os.path.exists(gitdir):
-			if self.version.has_key('head'):
+			if 'head' in self.version:
 				return self.version['head']
 			return '00'
 		cmd = 'git rev-parse --verify HEAD'.split()
@@ -102,7 +105,7 @@ class gitVersion(ver):
 			out = subprocess.check_output(cmd)
 		except:
 			out = '\n'
-		out = out.split('\n',1)
+		out = out.decode(encoding).split('\n',1)
 		if len(out[0]) > 1:
 			ver = out[0]
 			self.version['head'] = ver
@@ -128,9 +131,9 @@ class gitVersion(ver):
 version = gitVersion(verfile)
 
 if __name__ == '__main__':
-	print 'Testing version.'
+	print('Testing version.')
 	v = hgVersion()
-	print 'dict:', v.version
-	print 'string:', v.asString
-	print 'float:', v.asFloat
-	print 'hghead', v.asHead
+	print('dict:', v.version)
+	print('string:', v.asString)
+	print('float:', v.asFloat)
+	print('hghead', v.asHead)
