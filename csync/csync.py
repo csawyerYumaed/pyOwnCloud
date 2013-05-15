@@ -3,8 +3,9 @@
 import os
 import sys
 import argparse
-import ConfigParser
+import configparser
 import ctypes
+from ctypes import *
 import re
 import pprint
 import copy
@@ -15,9 +16,9 @@ try:
 except:
 	keyring = None
 
-import csynclib
-import version
-VERSION = version.version
+from .csynclib import *
+from .version import *
+VERSION = version
 
 #Use global variables for user/pass & fingerprint because we have to handle this C callback stuff.
 USERNAME = ''
@@ -36,14 +37,14 @@ def authCallback(prompt, buffer, bufferLength, echo, verify, userData):
 		type is 1 for username, 0 for password.
 	"""
 	if DEBUG:
-		print 'authCallback:', prompt,  buffer,  bufferLength, echo, verify, userData
+		print('authCallback:', prompt,  buffer,  bufferLength, echo, verify, userData)
 		#print 'string:', ctypes.string_at(buffer, bufferLength-1)
 	ret = None
 	if 'username' in prompt:
 		ret = USERNAME
 	elif 'password' in prompt:
 		if keyring and USE_KEYRING:
-			print "using password from keyring"
+			print("using password from keyring")
 			ret = keyring.get_password('ownCloud', USERNAME)
 		if ret is None:
 			if not PASSWORD:
@@ -51,17 +52,17 @@ def authCallback(prompt, buffer, bufferLength, echo, verify, userData):
 			else:
 				ret = PASSWORD
 			if keyring and USE_KEYRING:
-				print "saving password to keyring"
+				print("saving password to keyring")
 				keyring.set_password('ownCloud', USERNAME, ret)
 	elif 'SSL' in prompt:
 		fingerprint = re.search("fingerprint: ([\\w\\d:]+)", prompt).group(1)
 		if fingerprint == SSLFINGERPRINT:
 			ret = 'yes'
 		else:
-			print 'SSL fingerprint: %s not accepted, aborting' % fingerprint
+			print('SSL fingerprint: %s not accepted, aborting' % fingerprint)
 			ret = 'no'
 	else:
-		print 'authCallback: unknown prompt:', prompt
+		print('authCallback: unknown prompt:', prompt)
 		return -1
 	bufferLength = len(ret)
 	for i in range(len(ret)):
@@ -71,7 +72,7 @@ def authCallback(prompt, buffer, bufferLength, echo, verify, userData):
 		if PASSWORD:
 			if PASSWORD in buffString:
 				buffString = buffString.replace(PASSWORD, PASSWORD_SAFE)
-		print 'returning:', buffString
+		print('returning:', buffString)
 	return 0
 
 class ownCloudSync():
@@ -93,20 +94,17 @@ class ownCloudSync():
 		PASSWORD = cfg['pass']
 		SSLFINGERPRINT = cfg['sslfingerprint']
 		USE_KEYRING = cfg['use_keyring']
-		libVersion = csynclib.csync_version(0,40,1)
+		libVersion = csync_version(0,40,1)
 		if DEBUG:
-			print 'libocsync version: ', libVersion
+			print('libocsync version: ', libVersion)
 		if libVersion not in ('0.70.4', '0.70.5'):
-			print 'This version of libocsync %s is not tested against ownCloud server 4.7.5.' % libVersion
-		c = csynclib.CSYNC()
+			print('This version of libocsync %s is not tested against ownCloud server 4.7.5.' % libVersion)
+		c = CSYNC()
 		self.ctx = ctypes.pointer(c)
 		self.buildURL()
 		#pprint.pprint(self.cfg)
-		print 'Syncing %s to %s logging in as user: %s' %  (self.cfg['src'], 
-			self.cfg['url'],
-			USERNAME,
-			)
-		if cfg.has_key('dry_run') and cfg['dry_run']:
+		print('Syncing {!s} to {!s} logging in as user: {!s}'.format(self.cfg('src'), self.cfg('url'), USERNAME))
+		if 'dry_run' in cfg and cfg['dry_run']:
 			return
 		self.sync()
 
@@ -114,7 +112,7 @@ class ownCloudSync():
 		"""build the URL we use for owncloud"""
 		url = self.cfg['url']
 		if url == '':
-			print 'You must specify a url, use --url, or put in cfg file.'
+			print('You must specify a url, use --url, or put in cfg file.')
 			sys.exit(1j)
 		url = url.replace('https','ownclouds')
 		url = url.replace('http','owncloud')
@@ -131,67 +129,69 @@ class ownCloudSync():
 			url = url[:-1]
 		self.cfg['url'] = url
 		if DEBUG:
-			print 'buildURL: ', url
+			print('buildURL: ', url)
 		return
 
 
 
 	def sync(self):
-		r = csynclib.csync_create(self.ctx, self.cfg['src'], self.cfg['url'])
+		srcRef = (e.encode() if isinstance(e, str) else e for e in self.cfg('src'))
+                urlRef = (e.encode() if isinstance(e, str) else e for e in self.cfg('url'))
+		r = csync_create(self.ctx, srcRef, urlRef))
 		if r != 0:
 			error(self.ctx,'csync_create', r)
-		csynclib.csync_set_log_callback(self.ctx, csynclib.csync_log_callback(log))
-		acb = csynclib.csync_auth_callback(authCallback)
+		csync_set_log_callback(self.ctx, csync_log_callback(log))
+		acb = csync_auth_callback(authCallback)
 		if DEBUG:
-			print 'authCallback setup'
-		csynclib.csync_set_auth_callback(self.ctx, acb)
+			print('authCallback setup')
+		csync_set_auth_callback(self.ctx, acb)
 
-		r = csynclib.csync_init(self.ctx)
+		r = csync_init(self.ctx)
 		if r != 0:
 			error(self.ctx, 'csync_init', r)
 		if DEBUG:
-			print 'Initialization done.'
-		#csynclib.csync_set_log_verbosity(self.ctx, ctypes.c_int(11))
-		r = csynclib.csync_update(self.ctx)
+			print('Initialization done.')
+		#csync_set_log_verbosity(self.ctx, ctypes.c_int(11))
+		r = csync_update(self.ctx)
 		if r != 0:
 			error(self.ctx, 'csync_update', r)
 		if DEBUG:
-			print 'Update done.'
-		r = csynclib.csync_reconcile(self.ctx)
+			print('Update done.')
+		r = csync_reconcile(self.ctx)
 		if r != 0:
 			error(self.ctx, 'csync_reconcile', r)
 		if DEBUG:
-			print 'Reconcile done.'
-		r = csynclib.csync_propagate(self.ctx)
+			print('Reconcile done.')
+		r = csync_propagate(self.ctx)
 		if r != 0:
 			error(self.ctx, 'csync_propogate', r)
 		if DEBUG:
-			print 'Propogate finished, destroying.'
-		r = csynclib.csync_destroy(self.ctx)
+			print('Propogate finished, destroying.')
+		r = csync_destroy(self.ctx)
 		if r != 0:
 			error(self.ctx, 'csync_destroy', r)
 		return
 
 def log(ctx, verbosity, function, buffer, userdata):
 	"""Log stuff from the ocsync library, but it does not work..."""
-	print 'LOG:', verbosity, function, buffer, userdata
+	print('LOG:', verbosity, function, buffer, userdata)
 	return 0
 
 def error(ctx, cmd, returnCode):
 	"""handle library errors"""
-	errNum = csynclib.csync_get_error(ctx)
-	errMsg = csynclib.csync_get_error_string(ctx)
+	errNum = csync_get_error(ctx)
+	errMsg = csync_get_error_string(ctx)
 	if not errMsg:
 		if errNum == 20 and cmd == 'csync_update':
 			errMsg = 'This is an authentication problem with the server, check user/pass.'
 		if errNum == 26 and cmd == 'csync_update':
 			errMsg = 'This is a remote folder destination issue, check that the remote folder exists on ownCloud.'
-	print 'ERROR: %s exited %s, error %s: %s' % (
+	print('ERROR: %s exited %s, error %s: %s' % (
 		cmd,
 		returnCode,
 		errNum,
 		errMsg,
-		)
+		))
 	sys.exit(1)
 
 
@@ -208,28 +208,29 @@ def getConfigPath():
 		cfgPath = os.path.join('%LOCALAPPDATA%','ownCloud')
 		cfgPath = os.path.expandvars(cfgPath)
 	else:
-		print 'Unkown/not supported platform %s, please file a bug report. ' % sys.platform
+		print('Unkown/not supported platform %s, please file a bug report. ' % sys.platform)
 		sys.exit(1)
 	if DEBUG:
-		print 'getConfigPath:', cfgPath
+		print('getConfigPath:', cfgPath)
 	return cfgPath
 
 def getConfig(parser):
+	import getpass
 	args = vars(parser.parse_args())
 	if DEBUG:
-		print 'From args: '
+		print('From args: ')
 		pargs = copy.copy(args)
 		if pargs['pass']:
 			pargs['pass'] = PASSWORD_SAFE
 		pprint.pprint(pargs)
 	newArgs = {}
-	for k, v in args.iteritems():
+	for k, v in args.items():
 		if v:
 			newArgs[k] = v
 	args = newArgs
 	cfg = {}
 	cfgFile = None
-	if args.has_key('config'):
+	if 'config' in args:
 		cfgFile = args['config']
 	else:
 		cfgPath = getConfigPath()
@@ -241,13 +242,13 @@ def getConfig(parser):
 			things in the cfg file...
 				pass: the password
 			"""
-			c = ConfigParser.SafeConfigParser()
+			c = configparser.SafeConfigParser()
 			c.readfp(fd)
 			cfg = dict(c.items('ownCloud'))
 			if DEBUG:
-				print 'conifguration info received from %s:' % cfgFile
+				print('conifguration info received from %s:' % cfgFile)
 				pcfg = copy.copy(cfg)
-				if pcfg.has_key('pass'):
+				if 'pass' in pcfg:
 					pcfg['pass'] = PASSWORD_SAFE
 				pprint.pprint(pcfg)
 	cfg.setdefault('davPath', 'remote.php/webdav/')
@@ -255,18 +256,18 @@ def getConfig(parser):
 	cfg.setdefault('pass', None)
 	cfg.setdefault('user', getpass.getuser())
 	cfg.setdefault('use_keyring', False)
-	if os.environ.has_key('OCPASS'):
+	if 'OCPASS' in os.environ:
 		cfg['pass'] = os.environ['OCPASS']
 		if DEBUG:
-			print 'password coming from environment'
+			print('password coming from environment')
 	#cmd line arguments win out over config files.
 	parser.set_defaults(**cfg)
 	args = vars(parser.parse_args())
 	cfg.update(args)
 	if DEBUG:
-		print 'Finished config file:'
+		print('Finished config file:')
 		pcfg = copy.copy(cfg)
-		if pcfg.has_key('pass'):
+		if 'pass' in pcfg:
 			pcfg['pass'] = PASSWORD_SAFE
 		pprint.pprint(pcfg)
 	return cfg
@@ -277,7 +278,7 @@ def startSync(parser):
 		ownCloudSync(cfg)
 	except KeyError:
 		exc_type, exc_value, exc_tb = sys.exc_info()
-		print 'Sorry this option: %s is required, was not found in cfg file or on cmd line.' % (exc_value)
+		print('Sorry this option: %s is required, was not found in cfg file or on cmd line.' % (exc_value))
 		if DEBUG:
 			raise
 
@@ -347,7 +348,7 @@ Password options:
 	if args['debug']:
 		global DEBUG
 		DEBUG = True
-		print 'Turning debug on'
+		print('Turning debug on')
 	startSync(parser)
 
 if __name__ == '__main__':
