@@ -40,9 +40,9 @@ def authCallback(prompt, buffer, bufferLength, echo, verify, userData):
 		print('authCallback:', prompt,  buffer,  bufferLength, echo, verify, userData)
 		#print 'string:', ctypes.string_at(buffer, bufferLength-1)
 	ret = None
-	if 'username' in prompt:
+	if 'username' in prompt.decode():
 		ret = USERNAME
-	elif 'password' in prompt:
+	elif 'password' in prompt.decode():
 		if keyring and USE_KEYRING:
 			print("using password from keyring")
 			ret = keyring.get_password('ownCloud', USERNAME)
