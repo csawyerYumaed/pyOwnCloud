@@ -103,7 +103,7 @@ class ownCloudSync():
 		self.ctx = ctypes.pointer(c)
 		self.buildURL()
 		#pprint.pprint(self.cfg)
-		print('Syncing {!s} to {!s} logging in as user: {!s}'.format(self.cfg('src'), self.cfg('url'), USERNAME))
+		print('Syncing {!s} to {!s} logging in as user: {!s}'.format(self.cfg['src'], self.cfg['url'], USERNAME))
 		if 'dry_run' in cfg and cfg['dry_run']:
 			return
 		self.sync()
@@ -135,9 +135,9 @@ class ownCloudSync():
 
 
 	def sync(self):
-		srcRef = (e.encode() if isinstance(e, str) else e for e in self.cfg('src'))
-                urlRef = (e.encode() if isinstance(e, str) else e for e in self.cfg('url'))
-		r = csync_create(self.ctx, srcRef, urlRef))
+		srcRef = self.cfg['src'].encode('utf-8')
+		urlRef = self.cfg['url'].encode('utf-8')
+		r = csync_create(self.ctx, srcRef, urlRef)
 		if r != 0:
 			error(self.ctx,'csync_create', r)
 		csync_set_log_callback(self.ctx, csync_log_callback(log))
