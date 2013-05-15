@@ -4,21 +4,19 @@ import os
 import sys
 import argparse
 import configparser
-import ctypes
-from ctypes import *
 import re
 import pprint
 import copy
 import getpass
+import ctypes
 
 try:
 	import keyring
 except:
 	keyring = None
 
-from .csynclib import *
-from .version import *
-VERSION = version
+from . import csynclib, version
+VERSION = version.version
 
 #Use global variables for user/pass & fingerprint because we have to handle this C callback stuff.
 USERNAME = ''
@@ -94,12 +92,12 @@ class ownCloudSync():
 		PASSWORD = cfg['pass']
 		SSLFINGERPRINT = cfg['sslfingerprint']
 		USE_KEYRING = cfg['use_keyring']
-		libVersion = csync_version(0,40,1)
+		libVersion = csynclib.csync_version(0,40,1)
 		if DEBUG:
 			print('libocsync version: ', libVersion)
 		if libVersion not in ('0.70.4', '0.70.5'):
 			print('This version of libocsync %s is not tested against ownCloud server 4.7.5.' % libVersion)
-		c = CSYNC()
+		c = csynclib.CSYNC()
 		self.ctx = ctypes.pointer(c)
 		self.buildURL()
 		#pprint.pprint(self.cfg)
@@ -137,37 +135,37 @@ class ownCloudSync():
 	def sync(self):
 		srcRef = self.cfg['src'].encode('utf-8')
 		urlRef = self.cfg['url'].encode('utf-8')
-		r = csync_create(self.ctx, srcRef, urlRef)
+		r = csynclib.csync_create(self.ctx, srcRef, urlRef)
 		if r != 0:
 			error(self.ctx,'csync_create', r)
-		csync_set_log_callback(self.ctx, csync_log_callback(log))
-		acb = csync_auth_callback(authCallback)
+		csynclib.csync_set_log_callback(self.ctx, csynclib.csync_log_callback(log))
+		acb = csynclib.csync_auth_callback(authCallback)
 		if DEBUG:
 			print('authCallback setup')
-		csync_set_auth_callback(self.ctx, acb)
+		csynclib.csync_set_auth_callback(self.ctx, acb)
 
-		r = csync_init(self.ctx)
+		r = csynclib.csync_init(self.ctx)
 		if r != 0:
 			error(self.ctx, 'csync_init', r)
 		if DEBUG:
 			print('Initialization done.')
 		#csync_set_log_verbosity(self.ctx, ctypes.c_int(11))
-		r = csync_update(self.ctx)
+		r = csynclib.csync_update(self.ctx)
 		if r != 0:
 			error(self.ctx, 'csync_update', r)
 		if DEBUG:
 			print('Update done.')
-		r = csync_reconcile(self.ctx)
+		r = csynclib.csync_reconcile(self.ctx)
 		if r != 0:
 			error(self.ctx, 'csync_reconcile', r)
 		if DEBUG:
 			print('Reconcile done.')
-		r = csync_propagate(self.ctx)
+		r = csynclib.csync_propagate(self.ctx)
 		if r != 0:
 			error(self.ctx, 'csync_propogate', r)
 		if DEBUG:
 			print('Propogate finished, destroying.')
-		r = csync_destroy(self.ctx)
+		r = csynclib.csync_destroy(self.ctx)
 		if r != 0:
 			error(self.ctx, 'csync_destroy', r)
 		return
@@ -179,8 +177,8 @@ def log(ctx, verbosity, function, buffer, userdata):
 
 def error(ctx, cmd, returnCode):
 	"""handle library errors"""
-	errNum = csync_get_error(ctx)
-	errMsg = csync_get_error_string(ctx)
+	errNum = csynclib.csync_get_error(ctx)
+	errMsg = csynclib.csync_get_error_string(ctx)
 	if not errMsg:
 		if errNum == 20 and cmd == 'csync_update':
 			errMsg = 'This is an authentication problem with the server, check user/pass.'

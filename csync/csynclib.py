@@ -1,4 +1,5 @@
-from ctypes import *
+from ctypes import CDLL, CFUNCTYPE, POINTER, Structure, c_char_p, c_int, c_void_p, c_ulong, c_bool, c_long, c_longlong, c_uint, c_ulonglong, c_ulong, c_uint, c_ushort
+from ctypes.util import find_library
 import os
 import sys
 
