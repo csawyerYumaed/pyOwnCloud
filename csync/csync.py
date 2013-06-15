@@ -113,9 +113,9 @@ class ownCloudSync():
 	def buildURL(self):
 		"""build the URL we use for owncloud"""
 		url = self.cfg['url']
-		if url == '':
+		if not url:
 			print 'You must specify a url, use --url, or put in cfg file.'
-			sys.exit(1j)
+			sys.exit(1)
 		url = url.replace('https','ownclouds')
 		url = url.replace('http','owncloud')
 		#add / if needed
@@ -133,8 +133,6 @@ class ownCloudSync():
 		if DEBUG:
 			print 'buildURL: ', url
 		return
-
-
 
 	def sync(self):
 		r = csynclib.csync_create(self.ctx, self.cfg['src'], self.cfg['url'])
