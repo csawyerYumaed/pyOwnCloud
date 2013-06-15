@@ -96,7 +96,7 @@ class ownCloudSync():
 		libVersion = csynclib.csync_version(0,40,1)
 		if DEBUG:
 			print 'libocsync version: ', libVersion
-		if libVersion not in ('0.70.4', '0.70.5'):
+		if libVersion not in ('0.70.4', '0.70.5','0.70.6','0.70.7'):
 			print 'This version of libocsync %s is not tested against ownCloud server 4.7.5.' % libVersion
 		c = csynclib.CSYNC()
 		self.ctx = ctypes.pointer(c)
