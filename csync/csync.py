@@ -149,6 +149,14 @@ class ownCloudSync():
 			error(self.ctx, 'csync_init', r)
 		if DEBUG:
 			print 'Initialization done.'
+		if self.cfg.has_key('usedownloadlimit') and self.cfg['usedownloadlimit'] and self.cfg.has_key('downloadlimit'):
+			dlimit = ctypes.c_int(int(self.cfg['downloadlimit'])*1000)
+			print '-------> downloadlimit: ', dlimit
+			csynclib.csync_set_module_property(self.ctx, 'bandwidth_limit_download', ctypes.pointer(dlimit))
+		if self.cfg.has_key('useuploadlimit') and self.cfg['useuploadlimit'] and self.cfg.has_key('uploadlimit'):
+			ulimit = ctypes.c_int(int(self.cfg['uploadlimit'])*1000)
+			print '-------> uploadlimit: ', ulimit
+			csynclib.csync_set_module_property(self.ctx,'bandwidth_limit_upload',ctypes.pointer(ulimit))
 		#csynclib.csync_set_log_verbosity(self.ctx, ctypes.c_int(11))
 		r = csynclib.csync_update(self.ctx)
 		if r != 0:
@@ -241,7 +249,8 @@ def getConfig(parser):
 			"""
 			c = ConfigParser.SafeConfigParser()
 			c.readfp(fd)
-			cfg = dict(c.items('ownCloud'))
+			#cfg = dict(c.items('ownCloud'))
+			cfg = dict(c.items('BWLimit') + c.items('ownCloud'))
 			if DEBUG:
 				print 'conifguration info received from %s:' % cfgFile
 				pcfg = copy.copy(cfg)
