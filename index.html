@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Pyowncloud : ownCloud CLI client written in python, more info on owncloud: www.owncloud.org" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Pyowncloud</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/csawyerYumaed/pyOwnCloud">View on GitHub</a>
+
+          <h1 id="project_title">Pyowncloud</h1>
+          <h2 id="project_tagline">ownCloud CLI client written in python, more info on owncloud: www.owncloud.org</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/csawyerYumaed/pyOwnCloud/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/csawyerYumaed/pyOwnCloud/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a name="pyowncloud" class="anchor" href="#pyowncloud"><span class="octicon octicon-link"></span></a>pyOwnCloud</h1>
+
+<p>ownCloud CLI client written in python, more info about owncloud: <a href="http://www.owncloud.org">www.owncloud.org</a></p>
+
+<p>This code is now in production use, and has been tested against a variety of Linux machines,
+other platforms should work, but are currently untested. This code is in no way currently endorsed or
+supported by ownCloud, all bugs should be reported here and not there.</p>
+
+<h2>
+<a name="supportdiscussion" class="anchor" href="#supportdiscussion"><span class="octicon octicon-link"></span></a>Support/Discussion:</h2>
+
+<ul>
+<li>Use github for issues/patches/etc: <a href="https://github.com/csawyerYumaed/pyOwnCloud">https://github.com/csawyerYumaed/pyOwnCloud</a>
+</li>
+<li>For discussion use: <a href="http://lists.cknow.org/listinfo.cgi/pyowncloud-cknow.org">http://lists.cknow.org/listinfo.cgi/pyowncloud-cknow.org</a> (pyowncloud &lt;@&gt; lists.cknow.org)</li>
+</ul><h2>
+<a name="requirements" class="anchor" href="#requirements"><span class="octicon octicon-link"></span></a>Requirements:</h2>
+
+<ul>
+<li>The ocsync C library from ownCloud. If you install Mirall, you get it for free on Linux.
+If you don't want to install mirall, you can install the 'ocsync' binary package from the owncloud repo's.
+    So far we have successfully tested against 0.70.4 and 0.70.5 of the libocsync library.</li>
+<li>Python &gt; 2.6 &lt; 3 (patches welcome)</li>
+<li>An ownCloud server to sync with. (Presumably you already have one of these.)</li>
+</ul><h2>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation:</h2>
+
+<ul>
+<li>standard python setup.py script.</li>
+<li>
+<p>It will create a new command called oclient, and you can call that :)</p>
+
+<p>python setup.py install</p>
+</li>
+</ul><p>usage: just run oclient -h, and it will give you help.</p>
+
+<pre><code>usage: oclient [-h] [-v] [-c [CONFIG]] [-u [USER]] [--ssl [SSLFINGERPRINT]]
+               [-p [PASS]] [--dry-run] [--debug] [-s [SRC]] [-d [DST]]
+               [--url [URL]] [--use-keyring]
+
+Synchronize files across machines using ownCloud DAV server.
+
+optional arguments:
+-h, --help            Show this help message and exit
+-v, --version         Show program's version number and exit
+-c [CONFIG], --config [CONFIG]
+                      Configuration to use.
+-u [USER], --user [USER]
+                      Username on server.
+--ssl [SSLFINGERPRINT]
+                      SSL fingerprint on server to accept.
+-p [PASS], --pass [PASS]
+                      Password on server. You can also store this in
+                      environment variable OCPASS.
+--dry-run             Dry Run, do not actually execute command.
+--debug               Print a bunch of debug info.
+-s [SRC], --src [SRC]
+                      Local Directory to sync with.
+-d [DST], --dst [DST]
+                      Folder on server.
+--url [URL]           URL to sync to.
+--use-keyring         use keyring if available to store password safely.
+
+
+oclient supports the ownCloud config file, which is located here:
+    $HOME/.local/share/data/ownCloud/owncloud.cfg
+oclient only supports the 'ownCloud' section of the config.
+oclient supports the following keys in the cfg  file:
+    user: username on the ownCloud server
+    pass: password on the ownCloud server
+    url: url of the ownCloud server
+    sslfingerprint: valid SSL fingerprint for the server
+    src: local directory to sync against
+    dst: folder on the server to sync against
+
+complete example:
+[ownCloud]
+user=awesomeSauce
+pass=PasswordThisIsSuperSuperSecretReallyISwearLOL
+url=https://www.example.org/owncloud/
+sslfingerprint=
+src=/home/awesomeSauce/ownCloud
+dst=clientsync
+
+Password options:
+ *) You can specify on the cmd line: -p (not very safe)
+ *) In the environment variable: OCPASS
+ *) In the owncloud.cfg file as pass = &lt;password&gt;
+ *) Do none of the above, and it will prompt you for the password.
+ *) Use keyring to store passwords in a keyring. (needs Python Keyring Lib to be installed)
+
+ The choice is yours, if you put it in the cfg file, be careful to
+ make sure nobody but you can read the file. (0400/0600 file perms).
+</code></pre>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Pyowncloud maintained by <a href="https://github.com/csawyerYumaed">csawyerYumaed</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
