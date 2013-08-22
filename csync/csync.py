@@ -353,7 +353,7 @@ Password options:
 	parser.add_argument('-s', '--src', nargs='?',
 		default =  os.path.expanduser(os.path.join('~','ownCloud')),
 		help = "Local Directory to sync with.")
-	parser.add_argument('-d', '--dst', nargs='?', default = '',
+	parser.add_argument('-d', '--dst', nargs='?', default = 'clientsync',
 		help = "Folder on server.")
 	parser.add_argument('--url', nargs='?', default = None,
 		help = "URL to sync to.")
