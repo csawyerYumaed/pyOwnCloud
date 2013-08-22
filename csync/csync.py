@@ -27,6 +27,9 @@ SSLFINGERPRINT = ''
 DEBUG = False
 USE_KEYRING = False
 
+def CSYNC_VERSION_INT(a, b, c):
+    return ((a) << 16 | (b) << 8 | (c))
+
 def authCallback(prompt, buffer, bufferLength, echo, verify, userData):
 	"""
 	(const char *prompt, char *buf, size_t len,
@@ -149,6 +152,20 @@ class ownCloudSync():
 			error(self.ctx, 'csync_init', r)
 		if DEBUG:
 			print 'Initialization done.'
+		if self.cfg.has_key('usedownloadlimit') or self.cfg.has_key('useuploadlimit'):
+			if csynclib.csync_version(CSYNC_VERSION_INT(0,81,0)) is None:
+				print 'Bandwidth throttling requires ocsync version >= 0.81.0, ignoring limits'
+			else:
+				if self.cfg.has_key('usedownloadlimit') and self.cfg['usedownloadlimit'] and self.cfg.has_key('downloadlimit'):
+					dlimit = ctypes.c_int(int(self.cfg['downloadlimit']) * 1000)
+					if DEBUG:
+						print 'Download limit: ', dlimit.value
+					csynclib.csync_set_module_property(self.ctx, 'bandwidth_limit_download', ctypes.pointer(dlimit))
+				if self.cfg.has_key('useuploadlimit') and self.cfg['useuploadlimit'] and self.cfg.has_key('uploadlimit'):
+					ulimit = ctypes.c_int(int(self.cfg['uploadlimit']) * 1000)
+					if DEBUG:
+						print 'Upload limit: ', ulimit.value
+					csynclib.csync_set_module_property(self.ctx,'bandwidth_limit_upload',ctypes.pointer(ulimit))
 		#csynclib.csync_set_log_verbosity(self.ctx, ctypes.c_int(11))
 		r = csynclib.csync_update(self.ctx)
 		if r != 0:
@@ -241,7 +258,10 @@ def getConfig(parser):
 			"""
 			c = ConfigParser.SafeConfigParser()
 			c.readfp(fd)
-			cfg = dict(c.items('ownCloud'))
+			if csynclib.csync_version(CSYNC_VERSION_INT(0,81,0)) is None:
+				cfg = dict(c.items('ownCloud'))
+			else:
+				cfg = dict(c.items('BWLimit') + c.items('ownCloud'))
 			if DEBUG:
 				print 'conifguration info received from %s:' % cfgFile
 				pcfg = copy.copy(cfg)
@@ -332,11 +352,20 @@ Password options:
 		help = "Print a bunch of debug info.")
 	parser.add_argument('-s', '--src', nargs='?',
 		default =  os.path.expanduser(os.path.join('~','ownCloud')),
-		 help = "Local Directory to sync with.")
+		help = "Local Directory to sync with.")
 	parser.add_argument('-d', '--dst', nargs='?', default = 'clientsync',
 		help = "Folder on server.")
 	parser.add_argument('--url', nargs='?', default = None,
-		 help = "URL to sync to.")
+		help = "URL to sync to.")
+	if csynclib.csync_version(CSYNC_VERSION_INT(0,81,0)) is not None:
+		parser.add_argument('--usedownloadlimit', action = 'store_true', default = None,
+			help = "Use download limit.")
+		parser.add_argument('--useuploadlimit', action = 'store_true', default = None,
+			help = "Use upload limit.")
+		parser.add_argument('--downloadlimit', nargs = '?', default = 0,
+			help = "Download limit in KB/s.")
+		parser.add_argument('--uploadlimit', nargs = '?', default = 0,
+			help = "Upload limit in KB/s.")
 	if keyring:
 		parser.add_argument('--use-keyring', action = 'store_true', default = False,
 				help = "use keyring if available to store password safely.")
