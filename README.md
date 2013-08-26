@@ -20,6 +20,7 @@ Requirements:
         So far we have successfully tested against 0.70.4 and 0.70.5 of the libocsync library.
 * Python > 2.6 < 3 (patches welcome)
 * An ownCloud server to sync with. (Presumably you already have one of these.)
+* argparse for python (included with python > 2.7)
 
 Installation:
 -------------
