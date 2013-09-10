@@ -261,7 +261,12 @@ def getConfig(parser):
 			if csynclib.csync_version(CSYNC_VERSION_INT(0,81,0)) is None:
 				cfg = dict(c.items('ownCloud'))
 			else:
-				cfg = dict(c.items('BWLimit') + c.items('ownCloud'))
+				if c.has_section('BWLimit'):
+					cfg = dict(c.items('BWLimit') + c.items('ownCloud'))
+				else:
+					if DEBUG:
+						print 'config file has no section [BWLimit]'
+					cfg = dict(c.items('ownCloud'))
 			if DEBUG:
 				print 'conifguration info received from %s:' % cfgFile
 				pcfg = copy.copy(cfg)
