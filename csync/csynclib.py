@@ -171,12 +171,17 @@ csync_set_module_property.restype = c_int
 csync_set_module_property.argtypes = [POINTER(CSYNC), STRING, c_void_p]
 
 # values for enumeration 'csync_notify_type_e'
-CSYNC_NOTIFY_START_DOWNLOAD = 0
-CSYNC_NOTIFY_START_UPLOAD = 1
-CSYNC_NOTIFY_PROGRESS = 2
-CSYNC_NOTIFY_FINISHED_DOWNLOAD = 3
-CSYNC_NOTIFY_FINISHED_UPLOAD = 4
-CSYNC_NOTIFY_ERROR = 5
+CSYNC_NOTIFY_INVALID = 0
+CSYNC_NOTIFY_START_SYNC_SEQUENCE = 1
+CSYNC_NOTIFY_START_DOWNLOAD = 2
+CSYNC_NOTIFY_START_UPLOAD = 3
+CSYNC_NOTIFY_PROGRESS = 4
+CSYNC_NOTIFY_FINISHED_DOWNLOAD = 5
+CSYNC_NOTIFY_FINISHED_UPLOAD = 6
+CSYNC_NOTIFY_FINISHED_SYNC_SEQUENCE = 7
+CSYNC_NOTIFY_START_DELETE = 8
+CSYNC_NOTIFY_END_DELETE = 9
+CSYNC_NOTIFY_ERROR = 10
 csync_notify_type_e = c_int # enum
 csync_progress_callback = CFUNCTYPE(None, STRING, csync_notify_type_e, c_longlong, c_longlong, c_void_p)
 csync_set_progress_callback = _libraries['/usr/lib/libocsync.so.0'].csync_set_progress_callback
