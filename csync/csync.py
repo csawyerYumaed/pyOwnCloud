@@ -195,9 +195,9 @@ def error(ctx, cmd, returnCode):
 	errNum = csynclib.csync_get_error(ctx)
 	errMsg = csynclib.csync_get_error_string(ctx)
 	if not errMsg:
-		if errNum == 20 and cmd == 'csync_update':
+		if errNum == 21 and cmd == 'csync_update':
 			errMsg = 'This is an authentication problem with the server, check user/pass.'
-		if errNum == 26 and cmd == 'csync_update':
+		if errNum == 27 and cmd == 'csync_update':
 			errMsg = 'This is a remote folder destination issue, check that the remote folder exists on ownCloud.'
 	print 'ERROR: %s exited %s, error %s: %s' % (
 		cmd,
