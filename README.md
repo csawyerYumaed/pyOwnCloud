@@ -33,8 +33,9 @@ usage: just run oclient -h, and it will give you help.
     
     usage: oclient [-h] [-v] [-c [CONFIG]] [-u [USER]] [--ssl [SSLFINGERPRINT]]
                    [-p [PASS]] [--dry-run] [--debug] [-s [SRC]] [-d [DST]]
-                   [--url [URL]] [--use-keyring] [--usedownloadlimit] [--useuploadlimit]
-                   [--downloadlimit [DOWNLOADLIMIT]] [--uploadlimit [UPLOADLIMIT]]
+                   [--url [URL]] [--use-keyring] 
+                   [--usedownloadlimit] [--downloadlimit [DOWNLOADLIMIT]]  
+                   [--useuploadlimit] [--uploadlimit [UPLOADLIMIT]]
     
     Synchronize files across machines using ownCloud DAV server.
     
