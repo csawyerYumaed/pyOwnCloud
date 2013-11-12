@@ -648,6 +648,7 @@ mode_t = __mode_t
 CSYNC_FTW_TYPE_FILE = 0
 CSYNC_FTW_TYPE_SLINK = 1
 CSYNC_FTW_TYPE_DIR = 2
+CSYNC_FTW_TYPE_SKIP = 3
 csync_ftw_type_e = c_int # enum
 
 # values for enumeration 'csync_instructions_e'
