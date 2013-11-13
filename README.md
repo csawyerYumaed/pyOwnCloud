@@ -15,8 +15,9 @@ Support/Discussion:
 
 Requirements:
 -------------
-* The ocsync C library from ownCloud. If you install Mirall, you get it for free on Linux.
-	If you don't want to install mirall, you can install the 'ocsync' binary package from the owncloud repo's.
+* The ocsync C library from ownCloud. If you install Mirall/owncloud-client, you get it for free on Linux.
+	If you don't want to install mirall, you have to install the 'ocsync' binary package, usually named 'libocsync0' and the owncloud plugin, usually named 'libocsync-plugin-owncloud'. Installing the plugin should also install 'libocsync0' as a dependency.
+When running Debian jessy (=testing) or sid, you can install it right from the Debian archives. For other distributions you can get them through https://build.opensuse.org/package/show/isv:ownCloud:devel/ocsync .
 * Python > 2.6 < 3 (patches welcome)
 * An ownCloud server to sync with. (Presumably you already have one of these.)
 * argparse for python (included with python > 2.6)
