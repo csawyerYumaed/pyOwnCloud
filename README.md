@@ -16,8 +16,11 @@ Support/Discussion:
 Requirements:
 -------------
 * The ocsync C library from ownCloud. If you install Mirall/owncloud-client, you get it for free on Linux.
-	If you don't want to install mirall, you have to install the 'ocsync' binary package, usually named 'libocsync0' and the owncloud plugin, usually named 'libocsync-plugin-owncloud'. Installing the plugin should also install 'libocsync0' as a dependency.
-When running Debian jessy (=testing) or sid, you can install it right from the Debian archives. For other distributions you can get them through https://build.opensuse.org/package/show/isv:ownCloud:devel/ocsync .
+	If you don't want to install mirall, you have to install the 'ocsync' binary package,
+	usually named 'libocsync0' and the owncloud plugin, usually named 'libocsync-plugin-owncloud'.
+	Installing the plugin should also install 'libocsync0' as a dependency.
+When running Debian (jessy) or Ubuntu raring, you can install it right from the archives.
+For other distributions you can get them through https://build.opensuse.org/package/show/isv:ownCloud:devel/ocsync .
 * Python > 2.6 < 3 (patches welcome)
 * An ownCloud server to sync with. (Presumably you already have one of these.)
 * argparse for python (included with python > 2.6)
@@ -33,8 +36,8 @@ usage: just run oclient -h, and it will give you help.
     
     usage: oclient [-h] [-v] [-c [CONFIG]] [-u [USER]] [--ssl [SSLFINGERPRINT]]
                    [-p [PASS]] [--dry-run] [--debug] [-s [SRC]] [-d [DST]]
-                   [--url [URL]] [--use-keyring] 
-                   [--usedownloadlimit] [--downloadlimit [DOWNLOADLIMIT]]  
+                   [--url [URL]] [--use-keyring]
+                   [--usedownloadlimit] [--downloadlimit [DOWNLOADLIMIT]]
                    [--useuploadlimit] [--uploadlimit [UPLOADLIMIT]]
     
     Synchronize files across machines using ownCloud DAV server.
