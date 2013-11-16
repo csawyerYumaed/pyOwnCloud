@@ -13,7 +13,8 @@ SYNOPSIS
 *oclient* [-h] [-v] [-c 'CONFIG'] [-u 'USER'] [--ssl 'SSLFINGERPRINT']
         [-p 'PASS'] [--dry-run] [--debug] [-s 'SRC'] [-d 'DST']
         [--url 'URL'] [--use-keyring]
-
+        [--usedownloadlimit] [--downloadlimit 'DOWNLOADLIMIT']
+        [--useuploadlimit] [--uploadlimit 'UPLOADLIMIT']
 
 DESCRIPTION
 -----------
@@ -50,16 +51,25 @@ OPTIONS
 *--url 'URL'*::
     URL of the ownCloud server
 *--ssl 'SSLFINGERPRINT'*::
-    valid SSL fingerprint for the ownCloud server
+    Valid SSL fingerprint for the ownCloud server
 
 *--use-keyring*::
-    use keyring if available to store password safely (Needs Python Keyring Lib to be installed)
+    Use keyring if available to store password safely (Needs Python Keyring Lib to be installed)
+*--usedownloadlimit*::
+    Use download limit.
+*--downloadlimit 'DOWNLOADLIMIT'*::
+    Download limit in KB/s.
+*--useuploadlimit*::
+    Use upload limit.
+*--uploadlimit 'UPLOADLIMIT'*::
+    Upload limit in KB/s.
+
 *--dry-run*::
     Dry Run, do not actually execute command
 *--debug*::
     Print a bunch of debug info
 *-h, --help*::
-    show help message and exit
+    Show help message and exit
 *-v, --version*::
     show program's version number and exit
 
