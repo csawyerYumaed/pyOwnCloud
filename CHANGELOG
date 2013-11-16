@@ -1,6 +1,13 @@
 CHANGELOG
 =========
 
+version 0.3.1
+	* Updated the csync_ftw_type_e to the values of 0.90.4.
+	* Updated the csync_notify_type_e to the values of 0.90.4.
+	* Updated the csync_error_codes_e to the values of 0.90.4.
+	* Added bandwidtht hrottling.
+	* Raise an error if no url is defined at all.
+
 version 0.3 (released 2013-04-15)
 	* binary command is now called oclient.
 	* Manpage created.
