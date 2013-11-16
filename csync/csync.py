@@ -192,6 +192,7 @@ def log(ctx, verbosity, function, buffer, userdata):
 
 def error(ctx, cmd, returnCode):
 	"""handle library errors"""
+	libVersion = csynclib.csync_version(0,40,1)
 	errNum = csynclib.csync_get_error(ctx)
 	errMsg = csynclib.csync_get_error_string(ctx)
 	if not errMsg:
@@ -199,9 +200,10 @@ def error(ctx, cmd, returnCode):
 			errMsg = 'This is an authentication problem with the server, check user/pass.'
 		if errNum == csynclib.CSYNC_ERR_NOT_FOUND and cmd == 'csync_update':
 			errMsg = 'This is a remote folder destination issue, check that the remote folder exists on ownCloud.'
-	print 'ERROR: %s exited %s, error %s: %s' % (
+	print 'ERROR: %s exited with %s, csync(%s) error %s: %s' % (
 		cmd,
 		returnCode,
+		libVersion,
 		errNum,
 		errMsg,
 		)
