@@ -15,6 +15,11 @@ try:
 except:
 	keyring = None
 
+try:
+    from progressbar import ProgressBar, Percentage, Bar, ETA, FileTransferSpeed
+except ImportError:
+    ProgressBar = None
+
 import csynclib
 import version
 VERSION = version.version
@@ -90,6 +95,7 @@ class ownCloudSync():
 	"""
 	def __init__(self, cfg = None):
 		"""initialize"""
+		self.progress_callback = None
 		self.cfg = cfg
 		global USERNAME, PASSWORD, SSLFINGERPRINT, USE_KEYRING
 		USERNAME = cfg['user']
@@ -145,6 +151,9 @@ class ownCloudSync():
 			print 'authCallback setup'
 		csynclib.csync_set_auth_callback(self.ctx, acb)
 
+		if self.cfg['progress']:
+			csynclib.csync_set_progress_callback(self.ctx, self.get_progress_callback())
+
 		r = csynclib.csync_init(self.ctx)
 		if r != 0:
 			error(self.ctx, 'csync_init', r)
@@ -183,7 +192,57 @@ class ownCloudSync():
 		r = csynclib.csync_destroy(self.ctx)
 		if r != 0:
 			error(self.ctx, 'csync_destroy', r)
-		return
+
+	def get_progress_callback(self):
+		def progress_wrapper(progress_p, userdata_p):
+			if progress_p:
+				progress_p = progress_p[0]
+			if userdata_p:
+				userdata_p = userdata_p[0]
+			return self.progress(progress_p, userdata_p)
+		if not self.progress_callback:
+			self.progress_callback = csynclib.csync_progress_callback(progress_wrapper)
+		return self.progress_callback
+
+	def progress(self, progress, userdata):
+		progress_text = {
+			csynclib.CSYNC_NOTIFY_INVALID: "invalid",
+			csynclib.CSYNC_NOTIFY_START_SYNC_SEQUENCE: "start syncing",
+			csynclib.CSYNC_NOTIFY_START_DOWNLOAD: "start downloading",
+			csynclib.CSYNC_NOTIFY_START_UPLOAD: "start uploading",
+			csynclib.CSYNC_NOTIFY_PROGRESS: "progess message",
+			csynclib.CSYNC_NOTIFY_FINISHED_DOWNLOAD: "finished downloading",
+			csynclib.CSYNC_NOTIFY_FINISHED_UPLOAD: "finished uploading",
+			csynclib.CSYNC_NOTIFY_FINISHED_SYNC_SEQUENCE: "finished sycing",
+			csynclib.CSYNC_NOTIFY_START_DELETE: "start deleted",
+			csynclib.CSYNC_NOTIFY_END_DELETE: "end deleted",
+			csynclib.CSYNC_NOTIFY_ERROR: "error",
+			}
+
+		if progress.kind in (csynclib.CSYNC_NOTIFY_START_UPLOAD, csynclib.CSYNC_NOTIFY_START_DOWNLOAD, csynclib.CSYNC_NOTIFY_START_DELETE):
+			maxval = progress.overall_file_count
+			if progress.kind == csynclib.CSYNC_NOTIFY_START_UPLOAD:
+				self.progress_mode = "Uploading "
+			if progress.kind == csynclib.CSYNC_NOTIFY_START_DOWNLOAD:
+				self.progress_mode = "Downloading "
+			if progress.kind == csynclib.CSYNC_NOTIFY_START_DELETE:
+				self.progress_mode = "Deleting "
+				maxval = progress.overall_transmission_size
+
+			fname = progress.path[len(self.cfg['url'])+1:]
+			widgets = [self.progress_mode, fname, ' ', Percentage(), ' ', Bar(),
+				' ', ETA(), ' ', FileTransferSpeed()]
+			self.pbar = ProgressBar(widgets=widgets, maxval=maxval).start()
+		elif progress.kind in (csynclib.CSYNC_NOTIFY_FINISHED_DOWNLOAD, csynclib.CSYNC_NOTIFY_FINISHED_UPLOAD, csynclib.CSYNC_NOTIFY_END_DELETE):
+			self.pbar.finish()
+			return
+		elif progress.kind == csynclib.CSYNC_NOTIFY_PROGRESS:
+			self.pbar.update(progress.curr_bytes)
+		else:
+			if progress.kind in (csynclib.CSYNC_NOTIFY_START_SYNC_SEQUENCE, csynclib.CSYNC_NOTIFY_FINISHED_SYNC_SEQUENCE):
+				return
+			print progress_text[progress.kind]
+			print progress.path, progress.file_size, progress.curr_bytes, progress.overall_file_count, progress.current_file_no, progress.overall_transmission_size, progress.current_overall_bytes
 
 def log(ctx, verbosity, function, buffer, userdata):
 	"""Log stuff from the ocsync library, but it does not work..."""
@@ -208,7 +267,6 @@ def error(ctx, cmd, returnCode):
 		errMsg,
 		)
 	sys.exit(1)
-
 
 def getConfigPath():
 	"""get the local configuration file path
@@ -278,6 +336,7 @@ def getConfig(parser):
 	cfg.setdefault('pass', None)
 	cfg.setdefault('user', getpass.getuser())
 	cfg.setdefault('use_keyring', False)
+	cfg.setdefault('progress', False)
 	if os.environ.has_key('OCPASS'):
 		cfg['pass'] = os.environ['OCPASS']
 		if DEBUG:
@@ -374,7 +433,9 @@ Password options:
 	if keyring:
 		parser.add_argument('--use-keyring', action = 'store_true', default = False,
 				help = "use keyring if available to store password safely.")
-
+	if ProgressBar:
+		parser.add_argument('--progress', action = 'store_true', default = False,
+				help = "show progress while syncing.")
 	args = vars(parser.parse_args())
 	if args['debug']:
 		global DEBUG
@@ -383,6 +444,11 @@ Password options:
 	startSync(parser)
 
 if __name__ == '__main__':
+	import signal
+	def signal_handler(signal, frame):
+		print '\nYou pressed Ctrl+C'
+		sys.exit(1)
+	signal.signal(signal.SIGINT, signal_handler)
 	main()
 
 # vim: noet:ts=4:sw=4:sts=4
