@@ -121,6 +121,18 @@ csync_walk_remote_tree.argtypes = [POINTER(CSYNC), POINTER(csync_treewalk_visit_
 csync_set_iconv_codec = _libraries['/usr/lib/libocsync.so.0'].csync_set_iconv_codec
 csync_set_iconv_codec.restype = c_int
 csync_set_iconv_codec.argtypes = [STRING]
+class csync_progress_s(Structure):
+    pass
+CSYNC_PROGRESS = csync_progress_s
+csync_progress_callback = CFUNCTYPE(None, POINTER(CSYNC_PROGRESS), c_void_p)
+csync_set_progress_callback = _libraries['/usr/lib/libocsync.so.0'].csync_set_progress_callback
+csync_set_progress_callback.restype = c_int
+csync_set_progress_callback.argtypes = [POINTER(CSYNC), csync_progress_callback]
+csync_get_progress_callback = _libraries['/usr/lib/libocsync.so.0'].csync_get_progress_callback
+csync_get_progress_callback.restype = csync_progress_callback
+csync_get_progress_callback.argtypes = [POINTER(CSYNC)]
+
+
 
 # values for enumeration 'csync_error_codes_e'
 CSYNC_ERR_NONE = 0
@@ -665,6 +677,21 @@ CSYNC_INSTRUCTION_ERROR = 256
 CSYNC_INSTRUCTION_DELETED = 512
 CSYNC_INSTRUCTION_UPDATED = 1024
 csync_instructions_e = c_int # enum
+
+# values for enumeration 'csync_notify_type_e'
+CSYNC_NOTIFY_INVALID = 0
+CSYNC_NOTIFY_START_SYNC_SEQUENCE = 1
+CSYNC_NOTIFY_START_DOWNLOAD = 2
+CSYNC_NOTIFY_START_UPLOAD = 3
+CSYNC_NOTIFY_PROGRESS = 4
+CSYNC_NOTIFY_FINISHED_DOWNLOAD = 5
+CSYNC_NOTIFY_FINISHED_UPLOAD = 6
+CSYNC_NOTIFY_FINISHED_SYNC_SEQUENCE = 7
+CSYNC_NOTIFY_START_DELETE = 8
+CSYNC_NOTIFY_END_DELETE = 9
+CSYNC_NOTIFY_ERROR = 10
+csync_notify_type_e = c_int # enum
+
 csync_tree_walk_file_s._fields_ = [
     ('path', STRING),
     ('modtime', time_t),
@@ -674,6 +701,16 @@ csync_tree_walk_file_s._fields_ = [
     ('type', csync_ftw_type_e),
     ('instruction', csync_instructions_e),
     ('rename_path', STRING),
+]
+csync_progress_s._fields_ = [
+    ('kind', csync_notify_type_e),
+    ('path', STRING),
+    ("curr_bytes", c_int),
+    ("file_size", c_int),
+    ("overall_transmission_size", c_int),
+    ("current_overall_bytes", c_int),
+    ("overall_file_count", c_int),
+    ("current_file_no", c_int),
 ]
 csync_s._fields_ = [
 ]
@@ -702,7 +739,7 @@ __all__ = ['lseek64', 'lseek', 'CSYNC_ERR_LOCAL_CREATE',
            'csync_get_error', 'CSYNC_ERR_NONE', 'getusershell',
            'CSYNC_ERR_LOCAL_STAT', 'CSYNC_INSTRUCTION_NONE',
            'CSYNC_NOTIFY_FINISHED_UPLOAD', 'getlogin',
-           'csync_progress_callback', 'intptr_t',
+           'csync_progress_callback', 'csync_progress_s', 'intptr_t',
            'csync_walk_remote_tree', 'dup3', 'dup2', 'read',
            'getppid', 'CSYNC_INSTRUCTION_REMOVE', 'getdomainname',
            'fchown', 'getpgrp', 'CSYNC_NOTIFY_FINISHED_DOWNLOAD',
