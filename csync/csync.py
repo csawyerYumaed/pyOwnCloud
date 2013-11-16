@@ -433,7 +433,7 @@ Password options:
 	if keyring:
 		parser.add_argument('--use-keyring', action = 'store_true', default = False,
 				help = "use keyring if available to store password safely.")
-	if ProgressBar:
+	if ProgressBar and csynclib.csync_version(CSYNC_VERSION_INT(0,90,0)) is not None:
 		parser.add_argument('--progress', action = 'store_true', default = False,
 				help = "show progress while syncing.")
 	args = vars(parser.parse_args())
