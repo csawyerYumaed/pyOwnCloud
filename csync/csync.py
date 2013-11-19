@@ -71,9 +71,9 @@ def authCallback(prompt, buffer, bufferLength, echo, verify, userData):
 		ctypes.memset(buffer+i, ord(ret[i]), 1)
 	if DEBUG:
 		buffString = ctypes.string_at(buffer, bufferLength)
-		if PASSWORD:
-			if PASSWORD in buffString:
-				buffString = buffString.replace(PASSWORD, PASSWORD_SAFE)
+		if 'password' in prompt:
+			if ret and ret in buffString:
+				buffString = buffString.replace(ret, PASSWORD_SAFE)
 		print 'returning:', buffString
 	return 0
 
