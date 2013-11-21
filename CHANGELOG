@@ -2,11 +2,14 @@ CHANGELOG
 =========
 
 version 0.3.1
+	* Added bandwidth throttling.
+	* Raise an error if no url is defined at all.
+	* Print csync version to error output.
 	* Updated the csync_ftw_type_e to the values of 0.90.4.
 	* Updated the csync_notify_type_e to the values of 0.90.4.
 	* Updated the csync_error_codes_e to the values of 0.90.4.
-	* Added bandwidtht hrottling.
-	* Raise an error if no url is defined at all.
+	* Fixed: Authentication callback prints real password in debug mode.
+	* Fixed: Indent in csync/csynclib.py.
 
 version 0.3 (released 2013-04-15)
 	* binary command is now called oclient.
@@ -14,7 +17,7 @@ version 0.3 (released 2013-04-15)
 	* keyring bugfixes.
 	* tested against version 0.70.5 of csync library.
 	* will prompt for password if not specified in other ways.
-	* has a setup.py and can be properly 'packaged' now.  
+	* has a setup.py and can be properly 'packaged' now.
 	* better finding of the csync C library
 	* uses python-keyring to use the same passwords as the owncloud-client if
 	available
