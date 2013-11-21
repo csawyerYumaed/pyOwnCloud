@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 import csync.version as ver
 setup(
 	name = "pyOwnCloud",
-	version = ver.version.asFloat,
+	version = ver.version.asString,
 	packages = find_packages(),
 	package_data = {
 		'csync': [ 'version.dat'],
