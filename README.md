@@ -94,8 +94,8 @@ usage: just run oclient -h, and it will give you help.
      *) You can specify on the cmd line: -p (not very safe)
      *) In the environment variable: OCPASS
      *) In the owncloud.cfg file as pass = <password>
-     *) Do none of the above, and it will prompt you for the password.
      *) Use keyring to store passwords in a keyring. (needs Python Keyring Lib to be installed)
+     *) Do none of the above, and it will prompt you for the password.
      
      The choice is yours, if you put it in the cfg file, be careful to
      make sure nobody but you can read the file. (0400/0600 file perms).
