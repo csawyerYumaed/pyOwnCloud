@@ -1,7 +1,8 @@
 CHANGELOG
 =========
 
-version 0.3.1
+version 0.3.1 (released 2013-11-23)
+-------------
 	* Added bandwidth throttling.
 	* Raise an error if no url is defined at all.
 	* Print csync version to error output.
@@ -12,6 +13,7 @@ version 0.3.1
 	* Fixed: Indent in csync/csynclib.py.
 
 version 0.3 (released 2013-04-15)
+-----------
 	* binary command is now called oclient.
 	* Manpage created.
 	* keyring bugfixes.
