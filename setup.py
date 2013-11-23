@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 import csync.version as ver
 setup(
 	name = "pyOwnCloud",
-	version = ver.version.asString(),
+	version = ver.version.asString,
 	packages = find_packages(),
 	package_data = {
 		'csync': [ 'version.dat'],
@@ -21,7 +21,7 @@ setup(
 	author_email = 'pyowncloud@lists.cknow.org',
 	license = 'GPLv2',
 	url = "https://github.com/csawyerYumaed/pyOwnCloud",
-        download_url = "https://github.com/csawyerYumaed/pyOwnCloud/tag/"+ver.version.asString(),
+        download_url = "https://github.com/csawyerYumaed/pyOwnCloud/tag/"+ver.version.asString,
 	description = 'ownCloud CLI client- connect your ownCloud with python.',
 	long_description = open('README.md').read(),
 	classifiers = [
