@@ -68,7 +68,7 @@ usage: just run oclient -h, and it will give you help.
     --uploadlimit [UPLOADLIMIT]
                           Upload limit in KB/s.
 
-    --progress            show progress while syncing. 
+    --progress            Show progress while syncing.
 
     oclient supports the ownCloud config file, which is located here:
         $HOME/.local/share/data/ownCloud/owncloud.cfg

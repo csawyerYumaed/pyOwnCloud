@@ -15,7 +15,7 @@ SYNOPSIS
         [--url 'URL'] [--use-keyring]
         [--downloadlimit 'DOWNLOADLIMIT']
         [--uploadlimit 'UPLOADLIMIT']
-
+        [--progress]
 DESCRIPTION
 -----------
 
@@ -59,6 +59,8 @@ OPTIONS
     Download limit in KB/s.
 *--uploadlimit 'UPLOADLIMIT'*::
     Upload limit in KB/s.
+*--progress*::
+    Show progress while syncing
 
 *--dry-run*::
     Dry Run, do not actually execute command
