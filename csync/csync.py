@@ -24,63 +24,12 @@ import csynclib
 import version
 VERSION = version.version
 
-#Use global variables for user/pass & fingerprint because we have to handle this C callback stuff.
-USERNAME = ''
-PASSWORD = ''
+#Global variables
 PASSWORD_SAFE = '********'
-SSLFINGERPRINT = ''
 DEBUG = False
-USE_KEYRING = False
 
 def CSYNC_VERSION_INT(a, b, c):
     return ((a) << 16 | (b) << 8 | (c))
-
-def authCallback(prompt, buffer, bufferLength, echo, verify, userData):
-	"""
-	(const char *prompt, char *buf, size_t len,
-		int echo, int verify, void *userdata)
-	called like this:
-		("Enter your username: ", buf, NE_ABUFSIZ-1, 1, 0, dav_session.userdata )
-		type is 1 for username, 0 for password.
-	"""
-	if DEBUG:
-		print 'authCallback:', prompt,  buffer,  bufferLength, echo, verify, userData
-		#print 'string:', ctypes.string_at(buffer, bufferLength-1)
-	ret = None
-	if 'username' in prompt:
-		ret = USERNAME
-	elif 'password' in prompt:
-		if keyring and USE_KEYRING:
-			print "using password from keyring"
-			ret = keyring.get_password('ownCloud', USERNAME)
-		if ret is None:
-			if not PASSWORD:
-				ret = getpass.getpass('ownCloud password:')
-			else:
-				ret = PASSWORD
-			if keyring and USE_KEYRING:
-				print "saving password to keyring"
-				keyring.set_password('ownCloud', USERNAME, ret)
-	elif 'SSL' in prompt:
-		fingerprint = re.search("fingerprint: ([\\w\\d:]+)", prompt).group(1)
-		if fingerprint == SSLFINGERPRINT:
-			ret = 'yes'
-		else:
-			print 'SSL fingerprint: %s not accepted, aborting' % fingerprint
-			ret = 'no'
-	else:
-		print 'authCallback: unknown prompt:', prompt
-		return -1
-	bufferLength = len(ret)
-	for i in range(len(ret)):
-		ctypes.memset(buffer+i, ord(ret[i]), 1)
-	if DEBUG:
-		buffString = ctypes.string_at(buffer, bufferLength)
-		if 'password' in prompt:
-			if ret and ret in buffString:
-				buffString = buffString.replace(ret, PASSWORD_SAFE)
-		print 'returning:', buffString
-	return 0
 
 class ownCloudSync():
 	"""This handles the actual syncying with ownCloud
@@ -95,13 +44,13 @@ class ownCloudSync():
 	"""
 	def __init__(self, cfg = None):
 		"""initialize"""
+		self.auth_callback = None
 		self.progress_callback = None
 		self.cfg = cfg
-		global USERNAME, PASSWORD, SSLFINGERPRINT, USE_KEYRING
-		USERNAME = cfg['user']
-		PASSWORD = cfg['pass']
-		SSLFINGERPRINT = cfg['sslfingerprint']
-		USE_KEYRING = cfg['use_keyring']
+		self._user = cfg['user']
+		self._password = cfg['pass']
+		self._fingerprint = cfg['sslfingerprint']
+		self._keyring = cfg['use_keyring']
 		libVersion = csynclib.csync_version(0,40,1)
 		if DEBUG:
 			print 'libocsync version: ', libVersion
@@ -111,7 +60,7 @@ class ownCloudSync():
 		#pprint.pprint(self.cfg)
 		print 'Syncing %s to %s logging in as user: %s' %  (self.cfg['src'], 
 			self.cfg['url'],
-			USERNAME,
+			self._user,
 			)
 		if cfg.has_key('dry_run') and cfg['dry_run']:
 			return
@@ -141,15 +90,59 @@ class ownCloudSync():
 			print 'buildURL: ', url
 		return
 
+	def get_auth_callback(self):
+		"""gives back the auth callback:
+			The actual function is called out of the ownCloudSync object."""
+		def auth_wrapper(prompt, buffer, bufferLength, echo, verify, userData):
+			return self.authCallback(prompt, buffer, bufferLength, echo, verify, userData)
+		if not self.auth_callback:
+			self.auth_callback = csynclib.csync_auth_callback(auth_wrapper)
+		return self.auth_callback
+
+	def authCallback(self, prompt, buffer, bufferLength, echo, verify, userData):
+		"""
+		(const char *prompt, char *buf, size_t len,
+			int echo, int verify, void *userdata)
+		called like this:
+			("Enter your username: ", buf, NE_ABUFSIZ-1, 1, 0, dav_session.userdata )
+			type is 1 for username, 0 for password.
+		calls functions username(), password() or ssl(fingerprint)
+		"""
+		if DEBUG:
+			print 'authCallback:', prompt,  buffer,  bufferLength, echo, verify, userData
+			#print 'string:', ctypes.string_at(buffer, bufferLength-1)
+		ret = None
+		if 'username' in prompt:
+			ret = self.username()
+		elif 'password' in prompt:
+			ret = self.password()
+		elif 'SSL' in prompt:
+			fingerprint = re.search("fingerprint: ([\\w\\d:]+)", prompt).group(1)
+			ret = self.ssl(fingerprint)
+		else:
+			print 'authCallback: unknown prompt:', prompt
+			return -1
+		
+		for i in range(len(ret)):
+			ctypes.memset(buffer+i, ord(ret[i]), 1)
+		if DEBUG:
+			buffString = ctypes.string_at(buffer, len(ret))
+			if 'password' in prompt:
+				if ret and ret in buffString:
+					buffString = buffString.replace(ret, PASSWORD_SAFE)
+			print 'returning:', buffString
+		return 0
+
+
+
 	def sync(self):
 		r = csynclib.csync_create(self.ctx, self.cfg['src'], self.cfg['url'])
 		if r != 0:
 			error(self.ctx,'csync_create', r)
 		csynclib.csync_set_log_callback(self.ctx, csynclib.csync_log_callback(log))
-		acb = csynclib.csync_auth_callback(authCallback)
 		if DEBUG:
 			print 'authCallback setup'
-		csynclib.csync_set_auth_callback(self.ctx, acb)
+		csynclib.csync_set_auth_callback(self.ctx, self.get_auth_callback())
 
 		if self.cfg['progress']:
 			csynclib.csync_set_progress_callback(self.ctx, self.get_progress_callback())
@@ -244,6 +237,35 @@ class ownCloudSync():
 				return
 			print progress_text[progress.kind]
 			print progress.path, progress.file_size, progress.curr_bytes, progress.overall_file_count, progress.current_file_no, progress.overall_transmission_size, progress.current_overall_bytes
+
+	def username(self):
+		"""returns the username"""
+		return self._user
+
+	def password(self):
+		"""returns the password"""
+		ret = None
+		if keyring and self._keyring:
+			print "using password from keyring"
+			ret = keyring.get_password('ownCloud', self.username())
+		if ret is None:
+			if not self._password:
+				ret = getpass.getpass('ownCloud password:')
+			else:
+				ret = self._password
+			if keyring and self._keyring:
+				print "saving password to keyring"
+				keyring.set_password('ownCloud', self.username(), ret)
+		return ret
+
+	def ssl(self, fingerprint):
+		"""returns if fingerprint is valid (yes or no as string)"""
+		if fingerprint == self._fingerprint:
+			return 'yes'
+		else:
+			print 'SSL fingerprint: %s not accepted, aborting' % fingerprint
+			return 'no'
+
 
 def log(ctx, verbosity, function, buffer, userdata):
 	"""Log stuff from the ocsync library, but it does not work..."""
