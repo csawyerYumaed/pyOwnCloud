@@ -31,7 +31,7 @@
 oclient \- ownCloud CLI client written in python
 .SH "SYNOPSIS"
 .sp
-\fBoclient\fR [\-h] [\-v] [\-c \fICONFIG\fR] [\-u \fIUSER\fR] [\-\-ssl \fISSLFINGERPRINT\fR] [\-p \fIPASS\fR] [\-\-dry\-run] [\-\-debug] [\-s \fISRC\fR] [\-d \fIDST\fR] [\-\-url \fIURL\fR] [\-\-use\-keyring] [\-\-downloadlimit \fIDOWNLOADLIMIT\fR] [\-\-uploadlimit \fIUPLOADLIMIT\fR] [\-\-progress] DESCRIPTION
+\fBoclient\fR [\-h] [\-v] [\-c \fICONFIG\fR] [\-u \fIUSER\fR] [\-\-ssl \fISSLFINGERPRINT\fR] [\-p \fIPASS\fR] [\-\-dry\-run][\-\-debug] [\-\-verbosity\-ocsync \fIVERBOSITY_OCSYNC\fR] [\-s \fISRC\fR] [\-d \fIDST\fR] [\-\-url \fIURL\fR] [\-\-use\-keyring] [\-\-downloadlimit \fIDOWNLOADLIMIT\fR] [\-\-uploadlimit \fIUPLOADLIMIT\fR] [\-\-progress] DESCRIPTION
 .sp
 .nf
 Syncing files across machines using ownCloud DAV server\&.
@@ -114,6 +114,11 @@ Dry Run, do not actually execute command
 \fB\-\-debug\fR
 .RS 4
 Print a bunch of debug info
+.RE
+.PP
+\fB\-\-verbosity\-ocsync \fR\fB\fIVERBOSITY_OCSYNC\fR\fR
+.RS 4
+Verbosity for libocsync\&. (0=NOLOG,11=Everything)
 .RE
 .PP
 \fB\-h, \-\-help\fR

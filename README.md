@@ -35,7 +35,9 @@ Installation:
 usage: just run oclient -h, and it will give you help.
     
     usage: oclient [-h] [-v] [-c [CONFIG]] [-u [USER]] [--ssl [SSLFINGERPRINT]]
-                   [-p [PASS]] [--dry-run] [--debug] [-s [SRC]] [-d [DST]]
+                   [-p [PASS]]
+                   [--dry-run] [--debug] [--verbosity-ocsync VERBOSITY_OCSYNC]
+                   [-s [SRC]] [-d [DST]]
                    [--url [URL]] [--use-keyring]
                    [--downloadlimit [DOWNLOADLIMIT]]
                    [--uploadlimit [UPLOADLIMIT]]
@@ -57,6 +59,9 @@ usage: just run oclient -h, and it will give you help.
                           environment variable OCPASS.
     --dry-run             Dry Run, do not actually execute command.
     --debug               Print a bunch of debug info.
+    --verbosity-ocsync VERBOSITY_OCSYNC
+                          Verbosity for libocsync. (0=NOLOG,11=Everything)
+
     -s [SRC], --src [SRC]
                           Local Directory to sync with.
     -d [DST], --dst [DST]

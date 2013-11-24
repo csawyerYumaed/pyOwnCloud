@@ -11,7 +11,9 @@ SYNOPSIS
 --------
 
 *oclient* [-h] [-v] [-c 'CONFIG'] [-u 'USER'] [--ssl 'SSLFINGERPRINT']
-        [-p 'PASS'] [--dry-run] [--debug] [-s 'SRC'] [-d 'DST']
+        [-p 'PASS']
+        [--dry-run][--debug] [--verbosity-ocsync 'VERBOSITY_OCSYNC']
+        [-s 'SRC'] [-d 'DST']
         [--url 'URL'] [--use-keyring]
         [--downloadlimit 'DOWNLOADLIMIT']
         [--uploadlimit 'UPLOADLIMIT']
@@ -66,6 +68,9 @@ OPTIONS
     Dry Run, do not actually execute command
 *--debug*::
     Print a bunch of debug info
+*--verbosity-ocsync 'VERBOSITY_OCSYNC'*::
+    Verbosity for libocsync. (0=NOLOG,11=Everything)
+
 *-h, --help*::
     Show help message and exit
 *-v, --version*::
