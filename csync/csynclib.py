@@ -706,7 +706,20 @@ __fd_mask = c_long
 fd_set._fields_ = [
 	('fds_bits', __fd_mask * 16),
 ]
-__all__ = ['lseek64', 'lseek', 'CSYNC_ERR_LOCAL_CREATE',
+(CSYNC_LOG_PRIORITY_NOLOG,
+CSYNC_LOG_PRIORITY_FATAL,
+CSYNC_LOG_PRIORITY_ALERT,
+CSYNC_LOG_PRIORITY_CRIT,
+CSYNC_LOG_PRIORITY_ERROR,
+CSYNC_LOG_PRIORITY_WARN,
+CSYNC_LOG_PRIORITY_NOTICE,
+CSYNC_LOG_PRIORITY_INFO,
+CSYNC_LOG_PRIORITY_DEBUG,
+CSYNC_LOG_PRIORITY_TRACE,
+CSYNC_LOG_PRIORITY_NOTSET,
+CSYNC_LOG_PRIORITY_UNKNOWN,) = xrange(12)
+
+_all__ = ['lseek64', 'lseek', 'CSYNC_ERR_LOCAL_CREATE',
 	'csync_set_log_callback', 'seteuid',
 	'CSYNC_ERR_ACCESS_FAILED', 'isatty', 'CSYNC_ERR_TIMESKEW',
 	'execle', 'csync_is_statedb_disabled', 'truncate64',
@@ -789,4 +802,10 @@ __all__ = ['lseek64', 'lseek', 'CSYNC_ERR_LOCAL_CREATE',
 	'pwrite', 'getuid', 'csync_create', 'alarm',
 	'csync_get_local_only', 'csync_init', 'pipe', 'ctermid',
 	'chown', 'CSYNC_ERR_UPDATE', 'CSYNC_INSTRUCTION_NEW',
-	'csync_set_local_only', '__uid_t', 'profil', 'geteuid']
+           'csync_set_local_only', '__uid_t', 'profil', 'geteuid',
+           'CSYNC_LOG_PRIORITY_NOLOG', 'CSYNC_LOG_PRIORITY_FATAL',
+           'CSYNC_LOG_PRIORITY_ALERT', 'CSYNC_LOG_PRIORITY_CRIT',
+           'CSYNC_LOG_PRIORITY_ERROR', 'CSYNC_LOG_PRIORITY_WARN',
+           'CSYNC_LOG_PRIORITY_NOTICE', 'CSYNC_LOG_PRIORITY_INFO',
+           'CSYNC_LOG_PRIORITY_DEBUG', 'CSYNC_LOG_PRIORITY_TRACE',
+           'CSYNC_LOG_PRIORITY_NOTSET','CSYNC_LOG_PRIORITY_UNKNOWN',]
