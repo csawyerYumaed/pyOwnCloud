@@ -125,7 +125,7 @@ class gitVersion(ver):
 #else:
 #    version = ver(os.path.join(BASE_DIR, 'version.dat'))
 
-version = gitVersion(verfile)
+version = ver(verfile)
 
 if __name__ == '__main__':
 	print 'Testing version.'

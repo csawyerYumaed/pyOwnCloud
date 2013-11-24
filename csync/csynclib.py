@@ -22,7 +22,7 @@ class LP_LP_csync_s(Structure):
 	pass
 
 class csync_s(Structure):
-    pass
+	pass
 CSYNC = csync_s
 csync_create = _libraries['/usr/lib/libocsync.so.0'].csync_create
 csync_create.restype = c_int
@@ -109,7 +109,7 @@ csync_set_status = _libraries['/usr/lib/libocsync.so.0'].csync_set_status
 csync_set_status.restype = c_int
 csync_set_status.argtypes = [POINTER(CSYNC), c_int]
 class csync_tree_walk_file_s(Structure):
-    pass
+	pass
 TREE_WALK_FILE = csync_tree_walk_file_s
 csync_treewalk_visit_func = CFUNCTYPE(c_int, POINTER(TREE_WALK_FILE), c_void_p)
 csync_walk_local_tree = _libraries['/usr/lib/libocsync.so.0'].csync_walk_local_tree
@@ -269,23 +269,23 @@ getopt = _libraries['/usr/lib/libocsync.so.0'].getopt
 getopt.restype = c_int
 getopt.argtypes = [c_int, POINTER(STRING), STRING]
 class fd_set(Structure):
-    pass
+	pass
 class timeval(Structure):
-    pass
+	pass
 select = _libraries['/usr/lib/libocsync.so.0'].select
 select.restype = c_int
 select.argtypes = [c_int, POINTER(fd_set), POINTER(fd_set), POINTER(fd_set), POINTER(timeval)]
 class timespec(Structure):
-    pass
+	pass
 __time_t = c_long
 timespec._fields_ = [
-    ('tv_sec', __time_t),
-    ('tv_nsec', c_long),
+	('tv_sec', __time_t),
+	('tv_nsec', c_long),
 ]
 class __sigset_t(Structure):
-    pass
+	pass
 __sigset_t._fields_ = [
-    ('__val', c_ulong * 16),
+	('__val', c_ulong * 16),
 ]
 pselect = _libraries['/usr/lib/libocsync.so.0'].pselect
 pselect.restype = c_int
@@ -676,14 +676,14 @@ CSYNC_NOTIFY_ERROR,) = xrange(11)
 csync_notify_type_e = c_int # enum
 
 csync_tree_walk_file_s._fields_ = [
-    ('path', STRING),
-    ('modtime', time_t),
-    ('uid', uid_t),
-    ('gid', gid_t),
-    ('mode', mode_t),
-    ('type', csync_ftw_type_e),
-    ('instruction', csync_instructions_e),
-    ('rename_path', STRING),
+	('path', STRING),
+	('modtime', time_t),
+	('uid', uid_t),
+	('gid', gid_t),
+	('mode', mode_t),
+	('type', csync_ftw_type_e),
+	('instruction', csync_instructions_e),
+	('rename_path', STRING),
 ]
 csync_progress_s._fields_ = [
     ('kind', csync_notify_type_e),
@@ -699,94 +699,94 @@ csync_s._fields_ = [
 ]
 __suseconds_t = c_long
 timeval._fields_ = [
-    ('tv_sec', __time_t),
-    ('tv_usec', __suseconds_t),
+	('tv_sec', __time_t),
+	('tv_usec', __suseconds_t),
 ]
 __fd_mask = c_long
 fd_set._fields_ = [
-    ('fds_bits', __fd_mask * 16),
+	('fds_bits', __fd_mask * 16),
 ]
 __all__ = ['lseek64', 'lseek', 'CSYNC_ERR_LOCAL_CREATE',
-           'csync_set_log_callback', 'seteuid',
-           'CSYNC_ERR_ACCESS_FAILED', 'isatty', 'CSYNC_ERR_TIMESKEW',
-           'execle', 'csync_is_statedb_disabled', 'truncate64',
-           '__time_t', 'CSYNC_FTW_TYPE_SLINK', 'sleep', 'lockf64',
-           'mode_t', '__off64_t', 'size_t', 'csync_walk_local_tree',
-           'getegid', 'csync_error_codes_e', 'group_member',
-           'CSYNC_ERR_STATEDB_LOAD', 'get_current_dir_name',
-           'csync_update', 'pause', 'csync_set_auth_callback',
-           'csync_add_exclude_list', 'getresgid', 'sethostname',
-           'CSYNC_NOTIFY_PROGRESS', 'CSYNC_ERR_CONNECT',
-           'CSYNC_ERR_UNSPEC', 'CSYNC_ERR_HTTP', 'fpathconf',
-           '__getpgid', 'csync_set_status', 'lchown', 'setgid',
-           'csync_get_error', 'CSYNC_ERR_NONE', 'getusershell',
-           'CSYNC_ERR_LOCAL_STAT', 'CSYNC_INSTRUCTION_NONE',
-           'CSYNC_NOTIFY_FINISHED_UPLOAD', 'getlogin',
-           'csync_progress_callback', 'csync_progress_s', 'intptr_t',
-           'csync_walk_remote_tree', 'dup3', 'dup2', 'read',
-           'getppid', 'CSYNC_INSTRUCTION_REMOVE', 'getdomainname',
-           'fchown', 'getpgrp', 'CSYNC_NOTIFY_FINISHED_DOWNLOAD',
-           'CSYNC_NOTIFY_START_DOWNLOAD', 'csync_get_error_string',
-           'gnu_dev_minor', 'execl', 'readlinkat', 'daemon', 'fsync',
-           'csync_set_module_property', 'CSYNC_INSTRUCTION_DELETED',
-           'tcsetpgrp', 'setreuid', 'csync_destroy',
-           'CSYNC_ERR_PROXY', 'CSYNC_NOTIFY_ERROR', 'getpagesize',
-           'setlogin', 'execv', 'nice', 'gnu_dev_makedev', 'ttyname',
-           'linkat', 'getlogin_r', 'CSYNC_ERR_RECONCILE', '__ssize_t',
-           '__confstr_chk', 'CSYNC_ERR_SERVICE_UNAVAILABLE',
-           'csync_set_config_dir', 'CSYNC_ERR_TIMEOUT', 'sync',
-           '__fd_mask', 'CSYNC_INSTRUCTION_STAT_ERROR', 'getresuid',
-           'fchownat', '__pid_t', 'execlp', 'csync_get_userdata',
-           'getgid', 'CSYNC_ERR_TREE', 'CSYNC_ERR_REMOTE_STAT',
-           'CSYNC_INSTRUCTION_EVAL', '__sigset_t',
-           'csync_get_log_callback', '__useconds_t',
-           'CSYNC_ERR_REMOTE_CREATE', 'CSYNC', 'csync_get_config_dir',
-           'CSYNC_ERR_AUTH_SERVER', 'csync_log_callback', 'access',
-           'setsid', '__ttyname_r_chk', 'select', 'acct',
-           'CSYNC_ERR_FILESYSTEM', 'ualarm', 'CSYNC_ERR_MEM',
-           'revoke', 'csync_s', '__pread64_chk', 'usleep', 'setpgid',
-           'setresgid', 'getcwd', 'symlink', 'pwrite64',
-           '__getgroups_chk', 'CSYNC_INSTRUCTION_ERROR', 'setregid',
-           'fchdir', 'ftruncate', 'setegid', 'csync_version',
-           'CSYNC_FTW_TYPE_DIR', 'CSYNC_INSTRUCTION_IGNORE',
-           'vhangup', 'getsid', 'csync_notify_type_e',
-           'CSYNC_INSTRUCTION_RENAME', 'symlinkat',
-           'CSYNC_ERR_FILE_TOO_BIG', 'pipe2', 'sethostid',
-           'CSYNC_INSTRUCTION_UPDATED', 'fd_set',
-           'csync_set_log_verbosity', '_exit', '__readlink_chk',
-           'endusershell', 'confstr', 'csync_treewalk_visit_func',
-           '__read_chk', '__mode_t', 'swab', 'csync_get_status',
-           'getpgid', 'brk', '__off_t', 'gethostid', 'pread',
-           '__readlinkat_chk', 'getdtablesize', 'ttyname_r',
-           '__gid_t', 'gethostname', 'timespec', 'CSYNC_ERR_EXISTS',
-           'faccessat', 'gnu_dev_major', 'rmdir', 'dup',
-           'csync_propagate', 'fdatasync', 'CSYNC_ERR_PARAM',
-           'csync_reconcile', '__pread_chk', 'execvpe',
-           'csync_ftw_type_e', 'eaccess', 'execvp', 'ftruncate64',
-           '__getlogin_r_chk', 'link', 'uid_t',
-           'csync_set_progress_callback', '__getcwd_chk', 'pselect',
-           'gid_t', 'CSYNC_ERR_PROPAGATE', 'execve', 'getpass',
-           'CSYNC_ERR_AUTH_PROXY', 'chdir', '__suseconds_t', 'sbrk',
-           '__getwd_chk', 'CSYNC_INSTRUCTION_SYNC',
-           'csync_get_statedb_file', 'CSYNC_ERR_NOSPC', 'setresuid',
-           'csync_auth_callback', 'fexecve', 'vfork', 'setuid',
-           'fork', 'csync_enable_conflictcopys', 'lockf', 'sysconf',
-           'syscall', 'csync_set_iconv_codec', 'getwd',
-           'setdomainname', 'pread64', 'euidaccess', 'close',
-           'csync_enable_statedb', 'CSYNC_ERR_LOG',
-           'csync_instructions_e', 'time_t', '__gethostname_chk',
-           'chroot', 'csync_tree_walk_file_s', 'getgroups',
-           'TREE_WALK_FILE', 'ssize_t', 'csync_disable_statedb',
-           'setpgrp', 'timeval', 'write', 'csync_get_auth_callback',
-           'CSYNC_NOTIFY_START_UPLOAD', 'getopt', 'CSYNC_ERR_LOCK',
-           'csync_get_log_verbosity', 'CSYNC_FTW_TYPE_FILE',
-           'CSYNC_ERR_LOOKUP', 'CSYNC_ERR_PERM',
-           'CSYNC_INSTRUCTION_CONFLICT', 'pathconf',
-           'csync_set_userdata', 'truncate', 'CSYNC_ERR_NOT_FOUND',
-           'CSYNC_ERROR_CODE', 'CSYNC_ERR_QUOTA', 'getpid',
-           'setusershell', 'readlink', 'CSYNC_ERR_MODULE', 'unlink',
-           'tcgetpgrp', 'unlinkat', '__getdomainname_chk', 'ttyslot',
-           'pwrite', 'getuid', 'csync_create', 'alarm',
-           'csync_get_local_only', 'csync_init', 'pipe', 'ctermid',
-           'chown', 'CSYNC_ERR_UPDATE', 'CSYNC_INSTRUCTION_NEW',
-           'csync_set_local_only', '__uid_t', 'profil', 'geteuid']
+	'csync_set_log_callback', 'seteuid',
+	'CSYNC_ERR_ACCESS_FAILED', 'isatty', 'CSYNC_ERR_TIMESKEW',
+	'execle', 'csync_is_statedb_disabled', 'truncate64',
+	'__time_t', 'CSYNC_FTW_TYPE_SLINK', 'sleep', 'lockf64',
+	'mode_t', '__off64_t', 'size_t', 'csync_walk_local_tree',
+	'getegid', 'csync_error_codes_e', 'group_member',
+	'CSYNC_ERR_STATEDB_LOAD', 'get_current_dir_name',
+	'csync_update', 'pause', 'csync_set_auth_callback',
+	'csync_add_exclude_list', 'getresgid', 'sethostname',
+	'CSYNC_NOTIFY_PROGRESS', 'CSYNC_ERR_CONNECT',
+	'CSYNC_ERR_UNSPEC', 'CSYNC_ERR_HTTP', 'fpathconf',
+	'__getpgid', 'csync_set_status', 'lchown', 'setgid',
+	'csync_get_error', 'CSYNC_ERR_NONE', 'getusershell',
+	'CSYNC_ERR_LOCAL_STAT', 'CSYNC_INSTRUCTION_NONE',
+	'CSYNC_NOTIFY_FINISHED_UPLOAD', 'getlogin',
+	'csync_progress_callback', 'intptr_t',
+	'csync_walk_remote_tree', 'dup3', 'dup2', 'read',
+	'getppid', 'CSYNC_INSTRUCTION_REMOVE', 'getdomainname',
+	'fchown', 'getpgrp', 'CSYNC_NOTIFY_FINISHED_DOWNLOAD',
+	'CSYNC_NOTIFY_START_DOWNLOAD', 'csync_get_error_string',
+	'gnu_dev_minor', 'execl', 'readlinkat', 'daemon', 'fsync',
+	'csync_set_module_property', 'CSYNC_INSTRUCTION_DELETED',
+	'tcsetpgrp', 'setreuid', 'csync_destroy',
+	'CSYNC_ERR_PROXY', 'CSYNC_NOTIFY_ERROR', 'getpagesize',
+	'setlogin', 'execv', 'nice', 'gnu_dev_makedev', 'ttyname',
+	'linkat', 'getlogin_r', 'CSYNC_ERR_RECONCILE', '__ssize_t',
+	'__confstr_chk', 'CSYNC_ERR_SERVICE_UNAVAILABLE',
+	'csync_set_config_dir', 'CSYNC_ERR_TIMEOUT', 'sync',
+	'__fd_mask', 'CSYNC_INSTRUCTION_STAT_ERROR', 'getresuid',
+	'fchownat', '__pid_t', 'execlp', 'csync_get_userdata',
+	'getgid', 'CSYNC_ERR_TREE', 'CSYNC_ERR_REMOTE_STAT',
+	'CSYNC_INSTRUCTION_EVAL', '__sigset_t',
+	'csync_get_log_callback', '__useconds_t',
+	'CSYNC_ERR_REMOTE_CREATE', 'CSYNC', 'csync_get_config_dir',
+	'CSYNC_ERR_AUTH_SERVER', 'csync_log_callback', 'access',
+	'setsid', '__ttyname_r_chk', 'select', 'acct',
+	'CSYNC_ERR_FILESYSTEM', 'ualarm', 'CSYNC_ERR_MEM',
+	'revoke', 'csync_s', '__pread64_chk', 'usleep', 'setpgid',
+	'setresgid', 'getcwd', 'symlink', 'pwrite64',
+	'__getgroups_chk', 'CSYNC_INSTRUCTION_ERROR', 'setregid',
+	'fchdir', 'ftruncate', 'setegid', 'csync_version',
+	'CSYNC_FTW_TYPE_DIR', 'CSYNC_INSTRUCTION_IGNORE',
+	'vhangup', 'getsid', 'csync_notify_type_e',
+	'CSYNC_INSTRUCTION_RENAME', 'symlinkat',
+	'CSYNC_ERR_FILE_TOO_BIG', 'pipe2', 'sethostid',
+	'CSYNC_INSTRUCTION_UPDATED', 'fd_set',
+	'csync_set_log_verbosity', '_exit', '__readlink_chk',
+	'endusershell', 'confstr', 'csync_treewalk_visit_func',
+	'__read_chk', '__mode_t', 'swab', 'csync_get_status',
+	'getpgid', 'brk', '__off_t', 'gethostid', 'pread',
+	'__readlinkat_chk', 'getdtablesize', 'ttyname_r',
+	'__gid_t', 'gethostname', 'timespec', 'CSYNC_ERR_EXISTS',
+	'faccessat', 'gnu_dev_major', 'rmdir', 'dup',
+	'csync_propagate', 'fdatasync', 'CSYNC_ERR_PARAM',
+	'csync_reconcile', '__pread_chk', 'execvpe',
+	'csync_ftw_type_e', 'eaccess', 'execvp', 'ftruncate64',
+	'__getlogin_r_chk', 'link', 'uid_t',
+	'csync_set_progress_callback', '__getcwd_chk', 'pselect',
+	'gid_t', 'CSYNC_ERR_PROPAGATE', 'execve', 'getpass',
+	'CSYNC_ERR_AUTH_PROXY', 'chdir', '__suseconds_t', 'sbrk',
+	'__getwd_chk', 'CSYNC_INSTRUCTION_SYNC',
+	'csync_get_statedb_file', 'CSYNC_ERR_NOSPC', 'setresuid',
+	'csync_auth_callback', 'fexecve', 'vfork', 'setuid',
+	'fork', 'csync_enable_conflictcopys', 'lockf', 'sysconf',
+	'syscall', 'csync_set_iconv_codec', 'getwd',
+	'setdomainname', 'pread64', 'euidaccess', 'close',
+	'csync_enable_statedb', 'CSYNC_ERR_LOG',
+	'csync_instructions_e', 'time_t', '__gethostname_chk',
+	'chroot', 'csync_tree_walk_file_s', 'getgroups',
+	'TREE_WALK_FILE', 'ssize_t', 'csync_disable_statedb',
+	'setpgrp', 'timeval', 'write', 'csync_get_auth_callback',
+	'CSYNC_NOTIFY_START_UPLOAD', 'getopt', 'CSYNC_ERR_LOCK',
+	'csync_get_log_verbosity', 'CSYNC_FTW_TYPE_FILE',
+	'CSYNC_ERR_LOOKUP', 'CSYNC_ERR_PERM',
+	'CSYNC_INSTRUCTION_CONFLICT', 'pathconf',
+	'csync_set_userdata', 'truncate', 'CSYNC_ERR_NOT_FOUND',
+	'CSYNC_ERROR_CODE', 'CSYNC_ERR_QUOTA', 'getpid',
+	'setusershell', 'readlink', 'CSYNC_ERR_MODULE', 'unlink',
+	'tcgetpgrp', 'unlinkat', '__getdomainname_chk', 'ttyslot',
+	'pwrite', 'getuid', 'csync_create', 'alarm',
+	'csync_get_local_only', 'csync_init', 'pipe', 'ctermid',
+	'chown', 'CSYNC_ERR_UPDATE', 'CSYNC_INSTRUCTION_NEW',
+	'csync_set_local_only', '__uid_t', 'profil', 'geteuid']

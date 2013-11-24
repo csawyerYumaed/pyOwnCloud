@@ -2,12 +2,12 @@
 .\"     Title: oclient
 .\"    Author: [see the "AUTHORS" section]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 11/16/2013
+.\"      Date: 11/18/2013
 .\"    Manual: \ \&
 .\"    Source: \ \&
 .\"  Language: English
 .\"
-.TH "OCLIENT" "1" "11/16/2013" "\ \&" "\ \&"
+.TH "OCLIENT" "1" "11/18/2013" "\ \&" "\ \&"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -31,7 +31,7 @@
 oclient \- ownCloud CLI client written in python
 .SH "SYNOPSIS"
 .sp
-\fBoclient\fR [\-h] [\-v] [\-c \fICONFIG\fR] [\-u \fIUSER\fR] [\-\-ssl \fISSLFINGERPRINT\fR] [\-p \fIPASS\fR] [\-\-dry\-run] [\-\-debug] [\-s \fISRC\fR] [\-d \fIDST\fR] [\-\-url \fIURL\fR] [\-\-use\-keyring] [\-\-usedownloadlimit] [\-\-downloadlimit [DOWNLOADLIMIT]] [\-\-useuploadlimit] [\-\-uploadlimit [UPLOADLIMIT]]
+\fBoclient\fR [\-h] [\-v] [\-c \fICONFIG\fR] [\-u \fIUSER\fR] [\-\-ssl \fISSLFINGERPRINT\fR] [\-p \fIPASS\fR] [\-\-dry\-run] [\-\-debug] [\-s \fISRC\fR] [\-d \fIDST\fR] [\-\-url \fIURL\fR] [\-\-use\-keyring] [\-\-downloadlimit \fIDOWNLOADLIMIT\fR] [\-\-uploadlimit \fIUPLOADLIMIT\fR]
 .SH "DESCRIPTION"
 .sp
 Syncing files across machines using ownCloud DAV server\&.
@@ -142,22 +142,12 @@ Valid SSL fingerprint for the ownCloud server
 Use keyring if available to store password safely (Needs Python Keyring Lib to be installed)
 .RE
 .PP
-\fB\-\-usedownloadlimit\fR
-.RS 4
-Use download limit\&.
-.RE
-.PP
-\fB\-\-downloadlimit [DOWNLOADLIMIT]\fR
+\fB\-\-downloadlimit \fR\fB\fIDOWNLOADLIMIT\fR\fR
 .RS 4
 Download limit in KB/s\&.
 .RE
 .PP
-\fB\-\-useuploadlimit\fR
-.RS 4
-Use upload limit\&.
-.RE
-.PP
-\fB\-\-uploadlimit [UPLOADLIMIT]\fR
+\fB\-\-uploadlimit \fR\fB\fIUPLOADLIMIT\fR\fR
 .RS 4
 Upload limit in KB/s\&.
 .RE

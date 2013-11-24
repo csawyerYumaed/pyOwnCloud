@@ -8,4 +8,4 @@
 # To enable this hook, rename this file to "pre-commit".
 
 #set the version
-python -c 'from csync import version; version.version.asHead'
+python -c 'from csync.version import gitVersion,verfile; gitVersion(verfile).setup()'

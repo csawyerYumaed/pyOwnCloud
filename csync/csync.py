@@ -76,9 +76,9 @@ def authCallback(prompt, buffer, bufferLength, echo, verify, userData):
 		ctypes.memset(buffer+i, ord(ret[i]), 1)
 	if DEBUG:
 		buffString = ctypes.string_at(buffer, bufferLength)
-		if PASSWORD:
-			if PASSWORD in buffString:
-				buffString = buffString.replace(PASSWORD, PASSWORD_SAFE)
+		if 'password' in prompt:
+			if ret and ret in buffString:
+				buffString = buffString.replace(ret, PASSWORD_SAFE)
 		print 'returning:', buffString
 	return 0
 
@@ -159,16 +159,17 @@ class ownCloudSync():
 			error(self.ctx, 'csync_init', r)
 		if DEBUG:
 			print 'Initialization done.'
-		if self.cfg.has_key('usedownloadlimit') or self.cfg.has_key('useuploadlimit'):
+		if (self.cfg.has_key('downloadlimit') and self.cfg['downloadlimit']) or \
+			(self.cfg.has_key('uploadlimit') and self.cfg['uploadlimit']):
 			if csynclib.csync_version(CSYNC_VERSION_INT(0,81,0)) is None:
 				print 'Bandwidth throttling requires ocsync version >= 0.81.0, ignoring limits'
 			else:
-				if self.cfg.has_key('usedownloadlimit') and self.cfg['usedownloadlimit'] and self.cfg.has_key('downloadlimit'):
+				if self.cfg.has_key('downloadlimit') and self.cfg['downloadlimit']:
 					dlimit = ctypes.c_int(int(self.cfg['downloadlimit']) * 1000)
 					if DEBUG:
 						print 'Download limit: ', dlimit.value
 					csynclib.csync_set_module_property(self.ctx, 'bandwidth_limit_download', ctypes.pointer(dlimit))
-				if self.cfg.has_key('useuploadlimit') and self.cfg['useuploadlimit'] and self.cfg.has_key('uploadlimit'):
+				if self.cfg.has_key('uploadlimit') and self.cfg['uploadlimit']:
 					ulimit = ctypes.c_int(int(self.cfg['uploadlimit']) * 1000)
 					if DEBUG:
 						print 'Upload limit: ', ulimit.value
@@ -321,6 +322,10 @@ def getConfig(parser):
 			else:
 				if c.has_section('BWLimit'):
 					cfg = dict(c.items('BWLimit') + c.items('ownCloud'))
+					if not cfg['useuploadlimit']:
+						cfg['uploadlimit'] = None
+					if not cfg['usedownloadlimit']:
+						cfg['downloadlimit'] = None
 				else:
 					if DEBUG:
 						print 'config file has no section [BWLimit]'
@@ -422,13 +427,9 @@ Password options:
 	parser.add_argument('--url', nargs='?', default = None,
 		help = "URL to sync to.")
 	if csynclib.csync_version(CSYNC_VERSION_INT(0,81,0)) is not None:
-		parser.add_argument('--usedownloadlimit', action = 'store_true', default = None,
-			help = "Use download limit.")
-		parser.add_argument('--useuploadlimit', action = 'store_true', default = None,
-			help = "Use upload limit.")
-		parser.add_argument('--downloadlimit', nargs = '?', default = 0,
+		parser.add_argument('--downloadlimit', nargs = '?', default = None,
 			help = "Download limit in KB/s.")
-		parser.add_argument('--uploadlimit', nargs = '?', default = 0,
+		parser.add_argument('--uploadlimit', nargs = '?', default = None,
 			help = "Upload limit in KB/s.")
 	if keyring:
 		parser.add_argument('--use-keyring', action = 'store_true', default = False,
