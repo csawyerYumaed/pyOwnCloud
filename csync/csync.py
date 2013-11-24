@@ -45,6 +45,7 @@ class ownCloudSync():
 	def __init__(self, cfg = None):
 		"""initialize"""
 		self.auth_callback = None
+		self.log_callback = None
 		self.progress_callback = None
 		self.cfg = cfg
 		self._user = cfg['user']
@@ -139,14 +140,17 @@ class ownCloudSync():
 		r = csynclib.csync_create(self.ctx, self.cfg['src'], self.cfg['url'])
 		if r != 0:
 			error(self.ctx,'csync_create', r)
-		csynclib.csync_set_log_callback(self.ctx, csynclib.csync_log_callback(log))
+		
+		csynclib.csync_set_log_callback(self.ctx, self.get_log_callback())
+		csynclib.csync_set_log_verbosity(self.ctx, self.cfg['verbosity_ocsync'])
+
 		if DEBUG:
 			print 'authCallback setup'
 		csynclib.csync_set_auth_callback(self.ctx, self.get_auth_callback())
 
 		if self.cfg['progress']:
 			csynclib.csync_set_progress_callback(self.ctx, self.get_progress_callback())
-
+		
 		r = csynclib.csync_init(self.ctx)
 		if r != 0:
 			error(self.ctx, 'csync_init', r)
@@ -167,7 +171,6 @@ class ownCloudSync():
 					if DEBUG:
 						print 'Upload limit: ', ulimit.value
 					csynclib.csync_set_module_property(self.ctx,'bandwidth_limit_upload',ctypes.pointer(ulimit))
-		#csynclib.csync_set_log_verbosity(self.ctx, ctypes.c_int(11))
 		r = csynclib.csync_update(self.ctx)
 		if r != 0:
 			error(self.ctx, 'csync_update', r)
@@ -267,10 +270,16 @@ class ownCloudSync():
 			return 'no'
 
 
-def log(ctx, verbosity, function, buffer, userdata):
-	"""Log stuff from the ocsync library, but it does not work..."""
-	print 'LOG:', verbosity, function, buffer, userdata
-	return 0
+	def get_log_callback(self):
+		def log_wrapper(ctx, verbosity, function, buffer, userdata):
+			return self.log(verbosity, function, buffer, userdata)
+		if not self.log_callback:
+			self.log_callback = csynclib.csync_log_callback(log_wrapper)
+		return self.log_callback
+
+	def log(self, verbosity, function, buffer, userdata):
+		"""Log stuff from the ocsync library."""
+		print 'LOG:', verbosity, function, buffer
 
 def error(ctx, cmd, returnCode):
 	"""handle library errors"""
@@ -441,6 +450,8 @@ Password options:
 		help = "Dry Run, do not actually execute command.")
 	parser.add_argument('--debug', action = 'store_true', default = False,
 		help = "Print a bunch of debug info.")
+	parser.add_argument('--verbosity-ocsync', default = csynclib.CSYNC_LOG_PRIORITY_WARN, type=int,
+		help = "Verbosity for libocsync. (0=NOLOG,11=Everything)")
 	parser.add_argument('-s', '--src', nargs='?',
 		default =  os.path.expanduser(os.path.join('~','ownCloud')),
 		help = "Local Directory to sync with.")
