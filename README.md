@@ -37,8 +37,9 @@ usage: just run oclient -h, and it will give you help.
     usage: oclient [-h] [-v] [-c [CONFIG]] [-u [USER]] [--ssl [SSLFINGERPRINT]]
                    [-p [PASS]] [--dry-run] [--debug] [-s [SRC]] [-d [DST]]
                    [--url [URL]] [--use-keyring]
-                   [--usedownloadlimit] [--downloadlimit [DOWNLOADLIMIT]]
-                   [--useuploadlimit] [--uploadlimit [UPLOADLIMIT]]
+                   [--downloadlimit [DOWNLOADLIMIT]]
+                   [--uploadlimit [UPLOADLIMIT]]
+                   [--progress]
     
     Synchronize files across machines using ownCloud DAV server.
     
@@ -62,14 +63,13 @@ usage: just run oclient -h, and it will give you help.
                           Folder on server.
     --url [URL]           URL to sync to.
     --use-keyring         use keyring if available to store password safely.
-    --usedownloadlimit    Use download limit.
     --downloadlimit [DOWNLOADLIMIT]
                           Download limit in KB/s.
-    --useuploadlimit      Use upload limit.
     --uploadlimit [UPLOADLIMIT]
                           Upload limit in KB/s.
 
-    
+    --progress            show progress while syncing. 
+
     oclient supports the ownCloud config file, which is located here:
         $HOME/.local/share/data/ownCloud/owncloud.cfg
     oclient only supports the 'ownCloud' section of the config.
@@ -96,8 +96,8 @@ usage: just run oclient -h, and it will give you help.
      *) You can specify on the cmd line: -p (not very safe)
      *) In the environment variable: OCPASS
      *) In the owncloud.cfg file as pass = <password>
-     *) Do none of the above, and it will prompt you for the password.
      *) Use keyring to store passwords in a keyring. (needs Python Keyring Lib to be installed)
+     *) Do none of the above, and it will prompt you for the password.
      
      The choice is yours, if you put it in the cfg file, be careful to
      make sure nobody but you can read the file. (0400/0600 file perms).

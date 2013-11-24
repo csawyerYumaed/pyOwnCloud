@@ -15,6 +15,11 @@ try:
 except:
 	keyring = None
 
+try:
+    from progressbar import ProgressBar, Percentage, Bar, ETA, FileTransferSpeed
+except ImportError:
+    ProgressBar = None
+
 import csynclib
 import version
 VERSION = version.version
@@ -40,6 +45,7 @@ class ownCloudSync():
 	def __init__(self, cfg = None):
 		"""initialize"""
 		self.auth_callback = None
+		self.progress_callback = None
 		self.cfg = cfg
 		self._user = cfg['user']
 		self._password = cfg['pass']
@@ -138,21 +144,25 @@ class ownCloudSync():
 			print 'authCallback setup'
 		csynclib.csync_set_auth_callback(self.ctx, self.get_auth_callback())
 
+		if self.cfg['progress']:
+			csynclib.csync_set_progress_callback(self.ctx, self.get_progress_callback())
+
 		r = csynclib.csync_init(self.ctx)
 		if r != 0:
 			error(self.ctx, 'csync_init', r)
 		if DEBUG:
 			print 'Initialization done.'
-		if self.cfg.has_key('usedownloadlimit') or self.cfg.has_key('useuploadlimit'):
+		if (self.cfg.has_key('downloadlimit') and self.cfg['downloadlimit']) or \
+			(self.cfg.has_key('uploadlimit') and self.cfg['uploadlimit']):
 			if csynclib.csync_version(CSYNC_VERSION_INT(0,81,0)) is None:
 				print 'Bandwidth throttling requires ocsync version >= 0.81.0, ignoring limits'
 			else:
-				if self.cfg.has_key('usedownloadlimit') and self.cfg['usedownloadlimit'] and self.cfg.has_key('downloadlimit'):
+				if self.cfg.has_key('downloadlimit') and self.cfg['downloadlimit']:
 					dlimit = ctypes.c_int(int(self.cfg['downloadlimit']) * 1000)
 					if DEBUG:
 						print 'Download limit: ', dlimit.value
 					csynclib.csync_set_module_property(self.ctx, 'bandwidth_limit_download', ctypes.pointer(dlimit))
-				if self.cfg.has_key('useuploadlimit') and self.cfg['useuploadlimit'] and self.cfg.has_key('uploadlimit'):
+				if self.cfg.has_key('uploadlimit') and self.cfg['uploadlimit']:
 					ulimit = ctypes.c_int(int(self.cfg['uploadlimit']) * 1000)
 					if DEBUG:
 						print 'Upload limit: ', ulimit.value
@@ -176,7 +186,57 @@ class ownCloudSync():
 		r = csynclib.csync_destroy(self.ctx)
 		if r != 0:
 			error(self.ctx, 'csync_destroy', r)
-		return
+
+	def get_progress_callback(self):
+		def progress_wrapper(progress_p, userdata_p):
+			if progress_p:
+				progress_p = progress_p[0]
+			if userdata_p:
+				userdata_p = userdata_p[0]
+			return self.progress(progress_p, userdata_p)
+		if not self.progress_callback:
+			self.progress_callback = csynclib.csync_progress_callback(progress_wrapper)
+		return self.progress_callback
+
+	def progress(self, progress, userdata):
+		progress_text = {
+			csynclib.CSYNC_NOTIFY_INVALID: "invalid",
+			csynclib.CSYNC_NOTIFY_START_SYNC_SEQUENCE: "start syncing",
+			csynclib.CSYNC_NOTIFY_START_DOWNLOAD: "start downloading",
+			csynclib.CSYNC_NOTIFY_START_UPLOAD: "start uploading",
+			csynclib.CSYNC_NOTIFY_PROGRESS: "progess message",
+			csynclib.CSYNC_NOTIFY_FINISHED_DOWNLOAD: "finished downloading",
+			csynclib.CSYNC_NOTIFY_FINISHED_UPLOAD: "finished uploading",
+			csynclib.CSYNC_NOTIFY_FINISHED_SYNC_SEQUENCE: "finished sycing",
+			csynclib.CSYNC_NOTIFY_START_DELETE: "start deleted",
+			csynclib.CSYNC_NOTIFY_END_DELETE: "end deleted",
+			csynclib.CSYNC_NOTIFY_ERROR: "error",
+			}
+
+		if progress.kind in (csynclib.CSYNC_NOTIFY_START_UPLOAD, csynclib.CSYNC_NOTIFY_START_DOWNLOAD, csynclib.CSYNC_NOTIFY_START_DELETE):
+			maxval = progress.overall_file_count
+			if progress.kind == csynclib.CSYNC_NOTIFY_START_UPLOAD:
+				self.progress_mode = "Uploading "
+			if progress.kind == csynclib.CSYNC_NOTIFY_START_DOWNLOAD:
+				self.progress_mode = "Downloading "
+			if progress.kind == csynclib.CSYNC_NOTIFY_START_DELETE:
+				self.progress_mode = "Deleting "
+				maxval = progress.overall_transmission_size
+
+			fname = progress.path[len(self.cfg['url'])+1:]
+			widgets = [self.progress_mode, fname, ' ', Percentage(), ' ', Bar(),
+				' ', ETA(), ' ', FileTransferSpeed()]
+			self.pbar = ProgressBar(widgets=widgets, maxval=maxval).start()
+		elif progress.kind in (csynclib.CSYNC_NOTIFY_FINISHED_DOWNLOAD, csynclib.CSYNC_NOTIFY_FINISHED_UPLOAD, csynclib.CSYNC_NOTIFY_END_DELETE):
+			self.pbar.finish()
+			return
+		elif progress.kind == csynclib.CSYNC_NOTIFY_PROGRESS:
+			self.pbar.update(progress.curr_bytes)
+		else:
+			if progress.kind in (csynclib.CSYNC_NOTIFY_START_SYNC_SEQUENCE, csynclib.CSYNC_NOTIFY_FINISHED_SYNC_SEQUENCE):
+				return
+			print progress_text[progress.kind]
+			print progress.path, progress.file_size, progress.curr_bytes, progress.overall_file_count, progress.current_file_no, progress.overall_transmission_size, progress.current_overall_bytes
 
 	def username(self):
 		"""returns the username"""
@@ -231,7 +291,6 @@ def error(ctx, cmd, returnCode):
 		)
 	sys.exit(1)
 
-
 def getConfigPath():
 	"""get the local configuration file path
 	"""
@@ -285,6 +344,10 @@ def getConfig(parser):
 			else:
 				if c.has_section('BWLimit'):
 					cfg = dict(c.items('BWLimit') + c.items('ownCloud'))
+					if not cfg['useuploadlimit']:
+						cfg['uploadlimit'] = None
+					if not cfg['usedownloadlimit']:
+						cfg['downloadlimit'] = None
 				else:
 					if DEBUG:
 						print 'config file has no section [BWLimit]'
@@ -300,6 +363,7 @@ def getConfig(parser):
 	cfg.setdefault('pass', None)
 	cfg.setdefault('user', getpass.getuser())
 	cfg.setdefault('use_keyring', False)
+	cfg.setdefault('progress', False)
 	if os.environ.has_key('OCPASS'):
 		cfg['pass'] = os.environ['OCPASS']
 		if DEBUG:
@@ -385,18 +449,16 @@ Password options:
 	parser.add_argument('--url', nargs='?', default = None,
 		help = "URL to sync to.")
 	if csynclib.csync_version(CSYNC_VERSION_INT(0,81,0)) is not None:
-		parser.add_argument('--usedownloadlimit', action = 'store_true', default = None,
-			help = "Use download limit.")
-		parser.add_argument('--useuploadlimit', action = 'store_true', default = None,
-			help = "Use upload limit.")
-		parser.add_argument('--downloadlimit', nargs = '?', default = 0,
+		parser.add_argument('--downloadlimit', nargs = '?', default = None,
 			help = "Download limit in KB/s.")
-		parser.add_argument('--uploadlimit', nargs = '?', default = 0,
+		parser.add_argument('--uploadlimit', nargs = '?', default = None,
 			help = "Upload limit in KB/s.")
 	if keyring:
 		parser.add_argument('--use-keyring', action = 'store_true', default = False,
 				help = "use keyring if available to store password safely.")
-
+	if ProgressBar and csynclib.csync_version(CSYNC_VERSION_INT(0,90,0)) is not None:
+		parser.add_argument('--progress', action = 'store_true', default = False,
+				help = "show progress while syncing.")
 	args = vars(parser.parse_args())
 	if args['debug']:
 		global DEBUG
@@ -405,6 +467,11 @@ Password options:
 	startSync(parser)
 
 if __name__ == '__main__':
+	import signal
+	def signal_handler(signal, frame):
+		print '\nYou pressed Ctrl+C'
+		sys.exit(1)
+	signal.signal(signal.SIGINT, signal_handler)
 	main()
 
 # vim: noet:ts=4:sw=4:sts=4
