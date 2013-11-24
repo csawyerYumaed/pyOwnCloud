@@ -139,7 +139,7 @@ class ownCloudSync():
 	def sync(self):
 		r = csynclib.csync_create(self.ctx, self.cfg['src'], self.cfg['url'])
 		if r != 0:
-			error(self.ctx,'csync_create', r)
+			self.error('csync_create', r)
 		
 		csynclib.csync_set_log_callback(self.ctx, self.get_log_callback())
 		csynclib.csync_set_log_verbosity(self.ctx, self.cfg['verbosity_ocsync'])
@@ -152,9 +152,8 @@ class ownCloudSync():
 		
 		r = csynclib.csync_init(self.ctx)
 		if r != 0:
-			error(self.ctx, 'csync_init', r)
-		if DEBUG:
-			print 'Initialization done.'
+			self.error('csync_init', r)
+		self.logger.debug('Initialization done.')
 		if (self.cfg.has_key('downloadlimit') and self.cfg['downloadlimit']) or \
 			(self.cfg.has_key('uploadlimit') and self.cfg['uploadlimit']):
 			if csynclib.csync_version(CSYNC_VERSION_INT(0,81,0)) is None:
@@ -170,22 +169,19 @@ class ownCloudSync():
 					csynclib.csync_set_module_property(self.ctx,'bandwidth_limit_upload',ctypes.pointer(ulimit))
 		r = csynclib.csync_update(self.ctx)
 		if r != 0:
-			error(self.ctx, 'csync_update', r)
-		if DEBUG:
-			print 'Update done.'
+			self.error('csync_update', r)
+		self.logger.debug('Update done.')
 		r = csynclib.csync_reconcile(self.ctx)
 		if r != 0:
-			error(self.ctx, 'csync_reconcile', r)
-		if DEBUG:
-			print 'Reconcile done.'
+			self.error('csync_reconcile', r)
+		self.logger.debug('Reconcile done.')
 		r = csynclib.csync_propagate(self.ctx)
 		if r != 0:
-			error(self.ctx, 'csync_propogate', r)
-		if DEBUG:
-			print 'Propogate finished, destroying.'
+			self.error('csync_propogate', r)
+		self.logger.debug('Propogate finished, destroying.')
 		r = csynclib.csync_destroy(self.ctx)
 		if r != 0:
-			error(self.ctx, 'csync_destroy', r)
+			self.error('csync_destroy', r)
 
 	def get_progress_callback(self):
 		def progress_wrapper(progress_p, userdata_p):
@@ -296,24 +292,23 @@ class ownCloudSync():
 
 		logging.getLogger("ocsync").log(level, buffer)
 
-def error(ctx, cmd, returnCode):
-	"""handle library errors"""
-	libVersion = csynclib.csync_version(0,40,1)
-	errNum = csynclib.csync_get_error(ctx)
-	errMsg = csynclib.csync_get_error_string(ctx)
-	if not errMsg:
-		if errNum == csynclib.CSYNC_ERR_AUTH_SERVER and cmd == 'csync_update':
-			errMsg = 'This is an authentication problem with the server, check user/pass.'
-		if errNum == csynclib.CSYNC_ERR_NOT_FOUND and cmd == 'csync_update':
-			errMsg = 'This is a remote folder destination issue, check that the remote folder exists on ownCloud.'
-	print 'ERROR: %s exited with %s, csync(%s) error %s: %s' % (
-		cmd,
-		returnCode,
-		libVersion,
-		errNum,
-		errMsg,
-		)
-	sys.exit(1)
+	def error(self, cmd, returnCode):
+		"""handle library errors"""
+		errNum = csynclib.csync_get_error(self.ctx)
+		errMsg = csynclib.csync_get_error_string(self.ctx)
+		if not errMsg:
+			if errNum == csynclib.CSYNC_ERR_AUTH_SERVER and cmd == 'csync_update':
+				errMsg = 'This is an authentication problem with the server, check user/pass.'
+			if errNum == csynclib.CSYNC_ERR_NOT_FOUND and cmd == 'csync_update':
+				errMsg = 'This is a remote folder destination issue, check that the remote folder exists on ownCloud.'
+		self.logger.error('%s exited with %s, csync(%s) error %s: %s',
+			cmd,
+			returnCode,
+			self.libVersion,
+			errNum,
+			errMsg,
+			)
+		sys.exit(1)
 
 def getConfigPath():
 	"""get the local configuration file path
