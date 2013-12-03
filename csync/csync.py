@@ -273,7 +273,7 @@ def getConfig(parser):
 						print 'config file has no section [BWLimit]'
 					cfg = dict(c.items('ownCloud'))
 			if DEBUG:
-				print 'conifguration info received from %s:' % cfgFile
+				print 'configuration info received from %s:' % cfgFile
 				pcfg = copy.copy(cfg)
 				if pcfg.has_key('pass'):
 					pcfg['pass'] = PASSWORD_SAFE
