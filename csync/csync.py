@@ -62,7 +62,7 @@ class ownCloudSync():
 		c = csynclib.CSYNC()
 		self.ctx = ctypes.pointer(c)
 		self.buildURL()
-		self.logger.info('Syncing %s to %s logging in as user: %s' , self.cfg['src'],
+		self.logger.info('Syncing %s to %s, logging in as user: %s' , self.cfg['src'],
 			self.cfg['url'],
 			self._user,
 			)
@@ -298,9 +298,9 @@ class ownCloudSync():
 		errMsg = csynclib.csync_get_error_string(self.ctx)
 		if not errMsg:
 			if errNum == csynclib.CSYNC_ERR_AUTH_SERVER and cmd == 'csync_update':
-				errMsg = 'This is an authentication problem with the server, check user/pass.'
+				errMsg = 'The user could not be authenticated with the server, check username/password combination.'
 			if errNum == csynclib.CSYNC_ERR_NOT_FOUND and cmd == 'csync_update':
-				errMsg = 'This is a remote folder destination issue, check that the remote folder exists on ownCloud.'
+				errMsg = 'The remote folder "' + self.cfg['dst'] + '" could not be found, check that the remote folder exists on ownCloud.'
 		self.logger.error('%s exited with %s, csync(%s) error %s: %s',
 			cmd,
 			returnCode,
@@ -323,7 +323,7 @@ def getConfigPath():
 		cfgPath = os.path.join('%LOCALAPPDATA%','ownCloud')
 		cfgPath = os.path.expandvars(cfgPath)
 	else:
-		logging.warning('Unkown/not supported platform %s, please file a bug report. ', sys.platform)
+		logging.warning('Unknown/not supported platform %s, please file a bug report. ', sys.platform)
 		sys.exit(1)
 	logging.debug('getConfigPath: %s', cfgPath)
 	return cfgPath
@@ -383,13 +383,13 @@ def getConfig(parser):
 	cfg.setdefault('progress', False)
 	if os.environ.has_key('OCPASS'):
 		cfg['pass'] = os.environ['OCPASS']
-		logging.debug('password coming from environment')
+		logging.debug('password coming from environment variable OCPASS')
 	#cmd line arguments win out over config files.
 	parser.set_defaults(**cfg)
 	args = vars(parser.parse_args())
 	cfg.update(args)
 	if DEBUG:
-		logging.debug('Finished config file:')
+		logging.debug('Finished parsing configuration file:')
 		pcfg = copy.copy(cfg)
 		if pcfg.has_key('pass'):
 			pcfg['pass'] = PASSWORD_SAFE
@@ -402,7 +402,7 @@ def startSync(parser):
 		ownCloudSync(cfg)
 	except KeyError:
 		exc_type, exc_value, exc_tb = sys.exc_info()
-		logging.error('Sorry this option: %s is required, was not found in cfg file or on cmd line.', exc_value)
+		logging.error('This option "%s" is required, but was not found in the configuration.', exc_value)
 		if DEBUG:
 			raise
 
@@ -434,8 +434,8 @@ Password options:
   *) You can specify on the cmd line: -p (not very safe)
   *) In the envifonment variable: OCPASS
   *) In the owncloud.cfg file as pass = <password>
-  *) Do none of the above, and it will prompt you for the password.
   *) Use keyring to store passwords in a keyring. (keyring package is {keyring}installed)
+  *) Do none of the above, and it will prompt you for the password.
   The choice is yours, if you put it in the cfg file, be careful to
   make sure nobody but you can read the file. (0400/0600 file perms).
 		""".format(cfg = os.path.join(getConfigPath(),'owncloud.cfg'), keyring="" if keyring else "NOT "),
@@ -445,7 +445,7 @@ Password options:
 		action='version', 
 		version = '%(prog)s ' + v)
 	parser.add_argument('-c', '--config', nargs='?', default = None,
-		help = "Configuration to use.")
+		help = "Configuration file to use.")
 	parser.add_argument('-u', '--user', nargs='?', default = None,
 		help = "Username on server.")
 	parser.add_argument('--ssl', nargs='?', default = None,
@@ -456,16 +456,16 @@ Password options:
 	parser.add_argument('--dry-run', action = 'store_true', default = False,
 		help = "Dry Run, do not actually execute command.")
 	parser.add_argument('--debug', action = 'store_true', default = False,
-		help = "Print a bunch of debug info.")
+		help = "Print debug information.")
 	parser.add_argument('--verbosity-ocsync', default = csynclib.CSYNC_LOG_PRIORITY_WARN, type=int,
 		help = "Verbosity for libocsync. (0=NOLOG,11=Everything)")
 	parser.add_argument('-s', '--src', nargs='?',
 		default =  os.path.expanduser(os.path.join('~','ownCloud')),
 		help = "Local Directory to sync with.")
 	parser.add_argument('-d', '--dst', nargs='?', default = 'clientsync',
-		help = "Folder on server.")
+		help = "Remote Directory on server to sync to.")
 	parser.add_argument('--url', nargs='?', default = None,
-		help = "URL to sync to.")
+		help = "URL of owncloud server.")
 	if csynclib.csync_version(CSYNC_VERSION_INT(0,81,0)) is not None:
 		parser.add_argument('--downloadlimit', nargs = '?', default = None,
 			help = "Download limit in KB/s.")
@@ -473,10 +473,10 @@ Password options:
 			help = "Upload limit in KB/s.")
 	if keyring:
 		parser.add_argument('--use-keyring', action = 'store_true', default = False,
-				help = "use keyring if available to store password safely.")
+				help = "Use keyring if available to store password safely.")
 	if ProgressBar and csynclib.csync_version(CSYNC_VERSION_INT(0,90,0)) is not None:
 		parser.add_argument('--progress', action = 'store_true', default = False,
-				help = "show progress while syncing.")
+				help = "Show progress while syncing.")
 	args = vars(parser.parse_args())
 	if args['debug']:
 		global DEBUG
@@ -489,7 +489,7 @@ Password options:
 if __name__ == '__main__':
 	import signal
 	def signal_handler(signal, frame):
-		logging.info('\nYou pressed Ctrl+C')
+		logging.info('\nYou pressed Ctrl+C, aborting ...')
 		sys.exit(1)
 	signal.signal(signal.SIGINT, signal_handler)
 	main()
