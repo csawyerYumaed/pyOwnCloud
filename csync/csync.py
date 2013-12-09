@@ -9,6 +9,7 @@ import re
 import pprint
 import copy
 import getpass
+import logging
 
 try:
 	import keyring
@@ -22,9 +23,11 @@ except ImportError:
 
 import csynclib
 import version
-VERSION = version.version
+
+logging.basicConfig(level=logging.DEBUG, format='%(name)s-%(levelname)s: %(message)s')
 
 #Global variables
+VERSION = version.version
 PASSWORD_SAFE = '********'
 DEBUG = False
 
@@ -47,19 +50,19 @@ class ownCloudSync():
 		self.auth_callback = None
 		self.log_callback = None
 		self.progress_callback = None
+		self.logger = logging.getLogger("pyOC")
 		self.cfg = cfg
+		self.debug = cfg['debug']
 		self._user = cfg['user']
 		self._password = cfg['pass']
 		self._fingerprint = cfg['sslfingerprint']
 		self._keyring = cfg['use_keyring']
-		libVersion = csynclib.csync_version(0,40,1)
-		if DEBUG:
-			print 'libocsync version: ', libVersion
+		self.libVersion = csynclib.csync_version(0,40,1)
+		self.logger.debug('libocsync version: %s', self.libVersion)
 		c = csynclib.CSYNC()
 		self.ctx = ctypes.pointer(c)
 		self.buildURL()
-		#pprint.pprint(self.cfg)
-		print 'Syncing %s to %s logging in as user: %s' %  (self.cfg['src'], 
+		self.logger.info('Syncing %s to %s, logging in as user: %s' , self.cfg['src'],
 			self.cfg['url'],
 			self._user,
 			)
@@ -71,7 +74,7 @@ class ownCloudSync():
 		"""build the URL we use for owncloud"""
 		url = self.cfg['url']
 		if not url:
-			print 'You must specify a url, use --url, or put in cfg file.'
+			self.logger.error('You must specify a url, use --url, or put in cfg file.')
 			sys.exit(1)
 		url = url.replace('https','ownclouds')
 		url = url.replace('http','owncloud')
@@ -87,8 +90,7 @@ class ownCloudSync():
 		if url[-1:] == '/':
 			url = url[:-1]
 		self.cfg['url'] = url
-		if DEBUG:
-			print 'buildURL: ', url
+		self.logger.debug('buildURL: %s', url)
 		return
 
 	def get_auth_callback(self):
@@ -109,9 +111,7 @@ class ownCloudSync():
 			type is 1 for username, 0 for password.
 		calls functions username(), password() or ssl(fingerprint)
 		"""
-		if DEBUG:
-			print 'authCallback:', prompt,  buffer,  bufferLength, echo, verify, userData
-			#print 'string:', ctypes.string_at(buffer, bufferLength-1)
+		self.logger.debug("authCallback: '%s', %s, %i, %i, %i, %s", prompt,  buffer,  bufferLength, echo, verify, userData)
 		ret = None
 		if 'username' in prompt:
 			ret = self.username()
@@ -121,17 +121,17 @@ class ownCloudSync():
 			fingerprint = re.search("fingerprint: ([\\w\\d:]+)", prompt).group(1)
 			ret = self.ssl(fingerprint)
 		else:
-			print 'authCallback: unknown prompt:', prompt
+			self.logger.warning("authCallback: unknown prompt: '%s'", prompt)
 			return -1
 		
 		for i in range(len(ret)):
 			ctypes.memset(buffer+i, ord(ret[i]), 1)
-		if DEBUG:
+		if self.debug:
 			buffString = ctypes.string_at(buffer, len(ret))
 			if 'password' in prompt:
 				if ret and ret in buffString:
 					buffString = buffString.replace(ret, PASSWORD_SAFE)
-			print 'returning:', buffString
+			self.logger.debug("returning: '%s'", buffString)
 		return 0
 
 
@@ -139,13 +139,12 @@ class ownCloudSync():
 	def sync(self):
 		r = csynclib.csync_create(self.ctx, self.cfg['src'], self.cfg['url'])
 		if r != 0:
-			error(self.ctx,'csync_create', r)
+			self.error('csync_create', r)
 		
 		csynclib.csync_set_log_callback(self.ctx, self.get_log_callback())
 		csynclib.csync_set_log_verbosity(self.ctx, self.cfg['verbosity_ocsync'])
 
-		if DEBUG:
-			print 'authCallback setup'
+		self.logger.debug('authCallback setup')
 		csynclib.csync_set_auth_callback(self.ctx, self.get_auth_callback())
 
 		if self.cfg['progress']:
@@ -153,42 +152,36 @@ class ownCloudSync():
 		
 		r = csynclib.csync_init(self.ctx)
 		if r != 0:
-			error(self.ctx, 'csync_init', r)
-		if DEBUG:
-			print 'Initialization done.'
+			self.error('csync_init', r)
+		self.logger.debug('Initialization done.')
 		if (self.cfg.has_key('downloadlimit') and self.cfg['downloadlimit']) or \
 			(self.cfg.has_key('uploadlimit') and self.cfg['uploadlimit']):
 			if csynclib.csync_version(CSYNC_VERSION_INT(0,81,0)) is None:
-				print 'Bandwidth throttling requires ocsync version >= 0.81.0, ignoring limits'
+				self.logger.warning('Bandwidth throttling requires ocsync version >= 0.81.0, ignoring limits')
 			else:
 				if self.cfg.has_key('downloadlimit') and self.cfg['downloadlimit']:
 					dlimit = ctypes.c_int(int(self.cfg['downloadlimit']) * 1000)
-					if DEBUG:
-						print 'Download limit: ', dlimit.value
+					self.logger.debug('Download limit: %i', dlimit.value)
 					csynclib.csync_set_module_property(self.ctx, 'bandwidth_limit_download', ctypes.pointer(dlimit))
 				if self.cfg.has_key('uploadlimit') and self.cfg['uploadlimit']:
 					ulimit = ctypes.c_int(int(self.cfg['uploadlimit']) * 1000)
-					if DEBUG:
-						print 'Upload limit: ', ulimit.value
+					self.logger.debug('Upload limit: %i', ulimit.value)
 					csynclib.csync_set_module_property(self.ctx,'bandwidth_limit_upload',ctypes.pointer(ulimit))
 		r = csynclib.csync_update(self.ctx)
 		if r != 0:
-			error(self.ctx, 'csync_update', r)
-		if DEBUG:
-			print 'Update done.'
+			self.error('csync_update', r)
+		self.logger.debug('Update done.')
 		r = csynclib.csync_reconcile(self.ctx)
 		if r != 0:
-			error(self.ctx, 'csync_reconcile', r)
-		if DEBUG:
-			print 'Reconcile done.'
+			self.error('csync_reconcile', r)
+		self.logger.debug('Reconcile done.')
 		r = csynclib.csync_propagate(self.ctx)
 		if r != 0:
-			error(self.ctx, 'csync_propogate', r)
-		if DEBUG:
-			print 'Propogate finished, destroying.'
+			self.error('csync_propogate', r)
+		self.logger.debug('Propogate finished, destroying.')
 		r = csynclib.csync_destroy(self.ctx)
 		if r != 0:
-			error(self.ctx, 'csync_destroy', r)
+			self.error('csync_destroy', r)
 
 	def get_progress_callback(self):
 		def progress_wrapper(progress_p, userdata_p):
@@ -238,8 +231,8 @@ class ownCloudSync():
 		else:
 			if progress.kind in (csynclib.CSYNC_NOTIFY_START_SYNC_SEQUENCE, csynclib.CSYNC_NOTIFY_FINISHED_SYNC_SEQUENCE):
 				return
-			print progress_text[progress.kind]
-			print progress.path, progress.file_size, progress.curr_bytes, progress.overall_file_count, progress.current_file_no, progress.overall_transmission_size, progress.current_overall_bytes
+			self.logger.debug(progress_text[progress.kind])
+			self.logger.debug("'%s', %i, %i, %i, %i, %i, %i", progress.path, progress.file_size, progress.curr_bytes, progress.overall_file_count, progress.current_file_no, progress.overall_transmission_size, progress.current_overall_bytes)
 
 	def username(self):
 		"""returns the username"""
@@ -249,7 +242,7 @@ class ownCloudSync():
 		"""returns the password"""
 		ret = None
 		if keyring and self._keyring:
-			print "using password from keyring"
+			self.logger.debug("using password from keyring")
 			ret = keyring.get_password('ownCloud', self.username())
 		if ret is None:
 			if not self._password:
@@ -257,7 +250,7 @@ class ownCloudSync():
 			else:
 				ret = self._password
 			if keyring and self._keyring:
-				print "saving password to keyring"
+				self.logger.debug("saving password to keyring")
 				keyring.set_password('ownCloud', self.username(), ret)
 		return ret
 
@@ -266,7 +259,7 @@ class ownCloudSync():
 		if fingerprint == self._fingerprint:
 			return 'yes'
 		else:
-			print 'SSL fingerprint: %s not accepted, aborting' % fingerprint
+			self.logger.error('SSL fingerprint: %s not accepted, aborting' , fingerprint)
 			return 'no'
 
 
@@ -279,26 +272,43 @@ class ownCloudSync():
 
 	def log(self, verbosity, function, buffer, userdata):
 		"""Log stuff from the ocsync library."""
-		print 'LOG:', verbosity, function, buffer
+		v2l = {csynclib.CSYNC_LOG_PRIORITY_NOLOG: logging.CRITICAL,
+			csynclib.CSYNC_LOG_PRIORITY_FATAL: logging.CRITICAL,
+			csynclib.CSYNC_LOG_PRIORITY_ALERT: logging.CRITICAL,
+			csynclib.CSYNC_LOG_PRIORITY_CRIT: logging.CRITICAL,
+			csynclib.CSYNC_LOG_PRIORITY_ERROR: logging.ERROR,
+			csynclib.CSYNC_LOG_PRIORITY_WARN: logging.WARN,
+			csynclib.CSYNC_LOG_PRIORITY_NOTICE: logging.INFO,
+			csynclib.CSYNC_LOG_PRIORITY_INFO: logging.INFO,
+			csynclib.CSYNC_LOG_PRIORITY_DEBUG: logging.DEBUG,
+			csynclib.CSYNC_LOG_PRIORITY_TRACE: logging.DEBUG,
+			csynclib.CSYNC_LOG_PRIORITY_NOTSET: logging.DEBUG,
+			csynclib.CSYNC_LOG_PRIORITY_UNKNOWN: logging.DEBUG,
+			}
 
-def error(ctx, cmd, returnCode):
-	"""handle library errors"""
-	libVersion = csynclib.csync_version(0,40,1)
-	errNum = csynclib.csync_get_error(ctx)
-	errMsg = csynclib.csync_get_error_string(ctx)
-	if not errMsg:
-		if errNum == csynclib.CSYNC_ERR_AUTH_SERVER and cmd == 'csync_update':
-			errMsg = 'This is an authentication problem with the server, check user/pass.'
-		if errNum == csynclib.CSYNC_ERR_NOT_FOUND and cmd == 'csync_update':
-			errMsg = 'This is a remote folder destination issue, check that the remote folder exists on ownCloud.'
-	print 'ERROR: %s exited with %s, csync(%s) error %s: %s' % (
-		cmd,
-		returnCode,
-		libVersion,
-		errNum,
-		errMsg,
-		)
-	sys.exit(1)
+		level = logging.DEBUG
+		if verbosity in v2l:
+			level = v2l[verbosity]
+
+		logging.getLogger("ocsync").log(level, buffer)
+
+	def error(self, cmd, returnCode):
+		"""handle library errors"""
+		errNum = csynclib.csync_get_error(self.ctx)
+		errMsg = csynclib.csync_get_error_string(self.ctx)
+		if not errMsg:
+			if errNum == csynclib.CSYNC_ERR_AUTH_SERVER and cmd == 'csync_update':
+				errMsg = 'The user could not be authenticated with the server, check username/password combination.'
+			if errNum == csynclib.CSYNC_ERR_NOT_FOUND and cmd == 'csync_update':
+				errMsg = 'The remote folder "' + self.cfg['dst'] + '" could not be found, check that the remote folder exists on ownCloud.'
+		self.logger.error('%s exited with %s, csync(%s) error %s: %s',
+			cmd,
+			returnCode,
+			self.libVersion,
+			errNum,
+			errMsg,
+			)
+		sys.exit(1)
 
 def getConfigPath():
 	"""get the local configuration file path
@@ -313,20 +323,19 @@ def getConfigPath():
 		cfgPath = os.path.join('%LOCALAPPDATA%','ownCloud')
 		cfgPath = os.path.expandvars(cfgPath)
 	else:
-		print 'Unkown/not supported platform %s, please file a bug report. ' % sys.platform
+		logging.warning('Unknown/not supported platform %s, please file a bug report. ', sys.platform)
 		sys.exit(1)
-	if DEBUG:
-		print 'getConfigPath:', cfgPath
+	logging.debug('getConfigPath: %s', cfgPath)
 	return cfgPath
 
 def getConfig(parser):
 	args = vars(parser.parse_args())
 	if DEBUG:
-		print 'From args: '
+		logging.debug('From args: ')
 		pargs = copy.copy(args)
 		if pargs['pass']:
 			pargs['pass'] = PASSWORD_SAFE
-		pprint.pprint(pargs)
+		logging.debug(pprint.pformat(pargs))
 	newArgs = {}
 	for k, v in args.iteritems():
 		if v:
@@ -358,15 +367,14 @@ def getConfig(parser):
 					if not cfg['usedownloadlimit']:
 						cfg['downloadlimit'] = None
 				else:
-					if DEBUG:
-						print 'config file has no section [BWLimit]'
+					logging.debug('config file has no section [BWLimit]')
 					cfg = dict(c.items('ownCloud'))
 			if DEBUG:
-				print 'configuration info received from %s:' % cfgFile
+				logging.debug('configuration info received from %s:', cfgFile)
 				pcfg = copy.copy(cfg)
 				if pcfg.has_key('pass'):
 					pcfg['pass'] = PASSWORD_SAFE
-				pprint.pprint(pcfg)
+				logging.debug(pprint.pformat(pcfg))
 	cfg.setdefault('davPath', 'remote.php/webdav/')
 	cfg.setdefault('sslfingerprint' '')
 	cfg.setdefault('pass', None)
@@ -375,18 +383,17 @@ def getConfig(parser):
 	cfg.setdefault('progress', False)
 	if os.environ.has_key('OCPASS'):
 		cfg['pass'] = os.environ['OCPASS']
-		if DEBUG:
-			print 'password coming from environment'
+		logging.debug('password coming from environment variable OCPASS')
 	#cmd line arguments win out over config files.
 	parser.set_defaults(**cfg)
 	args = vars(parser.parse_args())
 	cfg.update(args)
 	if DEBUG:
-		print 'Finished config file:'
+		logging.debug('Finished parsing configuration file:')
 		pcfg = copy.copy(cfg)
 		if pcfg.has_key('pass'):
 			pcfg['pass'] = PASSWORD_SAFE
-		pprint.pprint(pcfg)
+		logging.debug(pprint.pformat(pcfg))
 	return cfg
 
 def startSync(parser):
@@ -395,7 +402,7 @@ def startSync(parser):
 		ownCloudSync(cfg)
 	except KeyError:
 		exc_type, exc_value, exc_tb = sys.exc_info()
-		print 'Sorry this option: %s is required, was not found in cfg file or on cmd line.' % (exc_value)
+		logging.error('This option "%s" is required, but was not found in the configuration.', exc_value)
 		if DEBUG:
 			raise
 
@@ -427,18 +434,18 @@ Password options:
   *) You can specify on the cmd line: -p (not very safe)
   *) In the envifonment variable: OCPASS
   *) In the owncloud.cfg file as pass = <password>
-  *) Do none of the above, and it will prompt you for the password.
   *) Use keyring to store passwords in a keyring. (keyring package is {keyring}installed)
+  *) Do none of the above, and it will prompt you for the password.
   The choice is yours, if you put it in the cfg file, be careful to
   make sure nobody but you can read the file. (0400/0600 file perms).
 		""".format(cfg = os.path.join(getConfigPath(),'owncloud.cfg'), keyring="" if keyring else "NOT "),
 	)
 	v = "%s - repo: %s" % (VERSION.asString, VERSION.asHead)
-	parser.add_argument('-v', '--version', 
+	parser.add_argument('-v', '--version',
 		action='version', 
 		version = '%(prog)s ' + v)
 	parser.add_argument('-c', '--config', nargs='?', default = None,
-		help = "Configuration to use.")
+		help = "Configuration file to use.")
 	parser.add_argument('-u', '--user', nargs='?', default = None,
 		help = "Username on server.")
 	parser.add_argument('--ssl', nargs='?', default = None,
@@ -449,16 +456,16 @@ Password options:
 	parser.add_argument('--dry-run', action = 'store_true', default = False,
 		help = "Dry Run, do not actually execute command.")
 	parser.add_argument('--debug', action = 'store_true', default = False,
-		help = "Print a bunch of debug info.")
+		help = "Print debug information.")
 	parser.add_argument('--verbosity-ocsync', default = csynclib.CSYNC_LOG_PRIORITY_WARN, type=int,
 		help = "Verbosity for libocsync. (0=NOLOG,11=Everything)")
 	parser.add_argument('-s', '--src', nargs='?',
 		default =  os.path.expanduser(os.path.join('~','ownCloud')),
 		help = "Local Directory to sync with.")
 	parser.add_argument('-d', '--dst', nargs='?', default = 'clientsync',
-		help = "Folder on server.")
+		help = "Remote Directory on server to sync to.")
 	parser.add_argument('--url', nargs='?', default = None,
-		help = "URL to sync to.")
+		help = "URL of owncloud server.")
 	if csynclib.csync_version(CSYNC_VERSION_INT(0,81,0)) is not None:
 		parser.add_argument('--downloadlimit', nargs = '?', default = None,
 			help = "Download limit in KB/s.")
@@ -466,21 +473,23 @@ Password options:
 			help = "Upload limit in KB/s.")
 	if keyring:
 		parser.add_argument('--use-keyring', action = 'store_true', default = False,
-				help = "use keyring if available to store password safely.")
+				help = "Use keyring if available to store password safely.")
 	if ProgressBar and csynclib.csync_version(CSYNC_VERSION_INT(0,90,0)) is not None:
 		parser.add_argument('--progress', action = 'store_true', default = False,
-				help = "show progress while syncing.")
+				help = "Show progress while syncing.")
 	args = vars(parser.parse_args())
 	if args['debug']:
 		global DEBUG
 		DEBUG = True
-		print 'Turning debug on'
+		logging.debug('Turning debug on')
+	else:
+		logging.getLogger('').setLevel(logging.INFO)
 	startSync(parser)
 
 if __name__ == '__main__':
 	import signal
 	def signal_handler(signal, frame):
-		print '\nYou pressed Ctrl+C'
+		logging.info('\nYou pressed Ctrl+C, aborting ...')
 		sys.exit(1)
 	signal.signal(signal.SIGINT, signal_handler)
 	main()
