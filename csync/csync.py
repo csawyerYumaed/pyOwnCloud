@@ -224,7 +224,7 @@ def getConfigPath():
 		cfgPath = os.path.join('%LOCALAPPDATA%','ownCloud')
 		cfgPath = os.path.expandvars(cfgPath)
 	else:
-		print 'Unkown/not supported platform %s, please file a bug report. ' % sys.platform
+		print 'Unknown/not supported platform %s, please file a bug report. ' % sys.platform
 		sys.exit(1)
 	if DEBUG:
 		print 'getConfigPath:', cfgPath
@@ -374,7 +374,7 @@ Password options:
 			help = "Upload limit in KB/s.")
 	if keyring:
 		parser.add_argument('--use-keyring', action = 'store_true', default = False,
-				help = "use keyring if available to store password safely.")
+				help = "Use keyring if available to store password safely.")
 
 	args = vars(parser.parse_args())
 	if args['debug']:
