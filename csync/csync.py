@@ -11,24 +11,28 @@ import copy
 import getpass
 import logging
 
+logging.basicConfig(level=logging.DEBUG, format='%(name)s-%(levelname)s: %(message)s')
+
 try:
 	import keyring
 except:
+	logging.debug('Keyring not available')
 	keyring = None
 
 try:
     from progressbar import ProgressBar, Percentage, Bar, ETA, FileTransferSpeed
 except ImportError:
+	logging.debug('ProgressBar not available')
     ProgressBar = None
 
 try:
 	import csynclib
-except ImportError:
+except ImportError as impError:
+	logging.critical(impError.message)
 	sys.exit(1)
 
 import version
 
-logging.basicConfig(level=logging.DEBUG, format='%(name)s-%(levelname)s: %(message)s')
 
 #Global variables
 VERSION = version.version
