@@ -58,7 +58,7 @@ def authCallback(prompt, buffer, bufferLength, echo, verify, userData):
 				keyring.set_password('ownCloud', USERNAME, ret)
 	elif 'SSL' in prompt:
 		fingerprint = re.search("fingerprint: ([\\w\\d:]+)", prompt).group(1)
-		if fingerprint == SSLFINGERPRINT:
+		if fingerprint.lower() == SSLFINGERPRINT.lower():
 			ret = 'yes'
 		else:
 			print 'SSL fingerprint: %s not accepted, aborting' % fingerprint
