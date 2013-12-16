@@ -55,7 +55,7 @@ class ownCloudSync():
 		self.debug = cfg['debug']
 		self._user = cfg['user']
 		self._password = cfg['pass']
-		self._fingerprint = cfg['sslfingerprint']
+		self._fingerprint = cfg['sslfingerprint'].lower()
 		self._keyring = cfg['use_keyring']
 		self.libVersion = csynclib.csync_version(0,40,1)
 		self.logger.debug('libocsync version: %s', self.libVersion)
@@ -256,7 +256,7 @@ class ownCloudSync():
 
 	def ssl(self, fingerprint):
 		"""returns if fingerprint is valid (yes or no as string)"""
-		if fingerprint == self._fingerprint:
+		if fingerprint.lower() == self._fingerprint:
 			return 'yes'
 		else:
 			self.logger.error('SSL fingerprint: %s not accepted, aborting' , fingerprint)
