@@ -4,7 +4,8 @@ need python modules:
 * ctypeslib
 * GitPython
 
-run it with one argument where a git clone of ocsync exists.
+run it with one argument where a git clone of ocsync exists:
+git://git.csync.org/users/owncloud/csync
 """
 
 from git import Repo
@@ -23,7 +24,6 @@ open('csync_version.h','a')
 open('config.h','a')
 
 #open the git repo
-print sys.argv
 repo = Repo(sys.argv[1])
 
 for tag in repo.tags:
