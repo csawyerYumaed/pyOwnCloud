@@ -21,7 +21,11 @@ try:
 except ImportError:
     ProgressBar = None
 
-import csynclib
+try:
+	import csynclib
+except ImportError:
+	sys.exit(1)
+
 import version
 
 logging.basicConfig(level=logging.DEBUG, format='%(name)s-%(levelname)s: %(message)s')

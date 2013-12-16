@@ -19,7 +19,7 @@ def getCSync():
             logger.debug('Found ocsync at %s', path)
 			return CDLL(path)
     logger.critical('Could not find shared library libocsync')
-    sys.exit(1)
+    raise ImportError('Could not find shared library libocsync')
 
 
 csynclib = getCSync()
