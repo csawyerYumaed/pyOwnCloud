@@ -23,7 +23,7 @@ try:
     from progressbar import ProgressBar, Percentage, Bar, ETA, FileTransferSpeed
 except ImportError:
 	logging.debug('ProgressBar not available')
-    ProgressBar = None
+	ProgressBar = None
 
 try:
 	import csynclib
