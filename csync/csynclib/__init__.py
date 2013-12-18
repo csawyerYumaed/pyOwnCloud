@@ -36,3 +36,5 @@ from .post import *
 
 __all__ += post.__all__
 __all__ += pre.__all__
+
+# vim: noet:ts=4:sw=4:sts=4

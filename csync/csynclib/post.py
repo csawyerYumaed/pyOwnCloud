@@ -695,3 +695,5 @@ __all__ = ['lseek64', 'lseek',
 	'csync_get_local_only', 'csync_init', 'pipe', 'ctermid',
 	'chown',
 	'csync_set_local_only', '__uid_t', 'profil', 'geteuid']
+
+# vim: noet:ts=4:sw=4:sts=4
