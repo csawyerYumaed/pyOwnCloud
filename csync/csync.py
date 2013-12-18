@@ -20,7 +20,7 @@ except:
 	keyring = None
 
 try:
-    from progressbar import ProgressBar, Percentage, Bar, ETA, FileTransferSpeed
+	from progressbar import ProgressBar, Percentage, Bar, ETA, FileTransferSpeed
 except ImportError:
 	logging.debug('ProgressBar not available')
 	ProgressBar = None
@@ -40,7 +40,7 @@ PASSWORD_SAFE = '********'
 DEBUG = False
 
 def CSYNC_VERSION_INT(a, b, c):
-    return ((a) << 16 | (b) << 8 | (c))
+	return ((a) << 16 | (b) << 8 | (c))
 
 class ownCloudSync():
 	"""This handles the actual syncying with ownCloud
@@ -423,7 +423,7 @@ oclient supports the ownCloud config file, which is located here:
   {cfg}
 oclient only supports the 'ownCloud' section of the config.
 oclient supports the following keys in the cfg  file:
-    user: username on the ownCloud server
+	user: username on the ownCloud server
 	pass: password on the ownCloud server
 	url: url of the ownCloud server
 	sslfingerprint: valid SSL fingerprint for the server

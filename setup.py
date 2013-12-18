@@ -21,7 +21,7 @@ setup(
 	author_email = 'pyowncloud@lists.cknow.org',
 	license = 'GPLv2',
 	url = "https://github.com/csawyerYumaed/pyOwnCloud",
-        download_url = "https://github.com/csawyerYumaed/pyOwnCloud/tag/"+ver.version.asString,
+		download_url = "https://github.com/csawyerYumaed/pyOwnCloud/tag/"+ver.version.asString,
 	description = 'ownCloud CLI client- connect your ownCloud with python.',
 	long_description = open('README.md').read(),
 	classifiers = [

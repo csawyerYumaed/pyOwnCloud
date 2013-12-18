@@ -110,7 +110,7 @@ csync_set_iconv_codec = csynclib.csync_set_iconv_codec
 csync_set_iconv_codec.restype = c_int
 csync_set_iconv_codec.argtypes = [STRING]
 class csync_progress_s(Structure):
-    pass
+	pass
 CSYNC_PROGRESS = csync_progress_s
 csync_progress_callback = CFUNCTYPE(None, POINTER(CSYNC_PROGRESS), c_void_p)
 csync_set_progress_callback = csynclib.csync_set_progress_callback
@@ -599,14 +599,14 @@ csync_tree_walk_file_s._fields_ = [
 	('rename_path', STRING),
 ]
 csync_progress_s._fields_ = [
-    ('kind', csync_notify_type_e),
-    ('path', STRING),
-    ("curr_bytes", c_int),
-    ("file_size", c_int),
-    ("overall_transmission_size", c_int),
-    ("current_overall_bytes", c_int),
-    ("overall_file_count", c_int),
-    ("current_file_no", c_int),
+	('kind', csync_notify_type_e),
+	('path', STRING),
+	("curr_bytes", c_int),
+	("file_size", c_int),
+	("overall_transmission_size", c_int),
+	("current_overall_bytes", c_int),
+	("overall_file_count", c_int),
+	("current_file_no", c_int),
 ]
 csync_s._fields_ = [
 ]
