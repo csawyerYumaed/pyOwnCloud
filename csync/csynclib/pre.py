@@ -22,12 +22,12 @@ def getCSync():
 	raise ImportError('Could not find shared library libocsync')
 
 
-csynclib = getCSync()
+_lib = getCSync()
 
-csync_version = csynclib.csync_version
+csync_version = _lib.csync_version
 csync_version.restype = c_char_p
 csync_version.argtypes = [c_int]
 
-__all__ = ['getCSync','csynclib','csync_version']
+__all__ = ['getCSync', 'csync_version']
 
 # vim: noet:ts=4:sw=4:sts=4

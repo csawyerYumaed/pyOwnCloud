@@ -142,25 +142,28 @@ class ownCloudSync():
 			self.logger.debug("returning: '%s'", buffString)
 		return 0
 
-
-
 	def sync(self):
 		r = csynclib.csync_create(self.ctx, self.cfg['src'], self.cfg['url'])
 		if r != 0:
 			self.error('csync_create', r)
-		
-		csynclib.csync_set_log_callback(self.ctx, self.get_log_callback())
-		csynclib.csync_set_log_verbosity(self.ctx, self.cfg['verbosity_ocsync'])
+
+		if csynclib.csync_version(CSYNC_VERSION_INT(0,91,0)) is None:
+			csynclib.csync_set_log_callback(self.ctx, self.get_log_callback())
+			csynclib.csync_set_log_verbosity(self.ctx, self.cfg['verbosity_ocsync'])
+		else:
+			csynclib.csync_set_log_callback(self.get_log_callback())
+			csynclib.csync_set_log_level(self.cfg['verbosity_ocsync'])
 
 		self.logger.debug('authCallback setup')
 		csynclib.csync_set_auth_callback(self.ctx, self.get_auth_callback())
 
 		if self.cfg['progress']:
 			csynclib.csync_set_progress_callback(self.ctx, self.get_progress_callback())
-		
+
 		r = csynclib.csync_init(self.ctx)
 		if r != 0:
 			self.error('csync_init', r)
+
 		self.logger.debug('Initialization done.')
 		if (self.cfg.has_key('downloadlimit') and self.cfg['downloadlimit']) or \
 			(self.cfg.has_key('uploadlimit') and self.cfg['uploadlimit']):
@@ -272,8 +275,12 @@ class ownCloudSync():
 
 
 	def get_log_callback(self):
-		def log_wrapper(ctx, verbosity, function, buffer, userdata):
-			return self.log(verbosity, function, buffer, userdata)
+		if csynclib.csync_version(CSYNC_VERSION_INT(0,91,0)) is None:
+			def log_wrapper(ctx, verbosity, function, buffer, userdata):
+				return self.log(verbosity, function, buffer, userdata)
+		else:
+			def log_wrapper(verbosity, function, buffer, userdata):
+				return self.log(verbosity, function, buffer, userdata)
 		if not self.log_callback:
 			self.log_callback = csynclib.csync_log_callback(log_wrapper)
 		return self.log_callback
@@ -302,8 +309,13 @@ class ownCloudSync():
 
 	def error(self, cmd, returnCode):
 		"""handle library errors"""
-		errNum = csynclib.csync_get_error(self.ctx)
-		errMsg = csynclib.csync_get_error_string(self.ctx)
+		if csynclib.csync_version(CSYNC_VERSION_INT(0,91,0)) is None:
+			errNum = csynclib.csync_get_error(self.ctx)
+			errMsg = csynclib.csync_get_error_string(self.ctx)
+		else:
+			errNum = csynclib.csync_get_status(self.ctx)
+			errMsg = csynclib.csync_get_status_string(self.ctx)
+		
 		if not errMsg:
 			if errNum == csynclib.CSYNC_ERR_AUTH_SERVER and cmd == 'csync_update':
 				errMsg = 'The user could not be authenticated with the server, check username/password combination.'
