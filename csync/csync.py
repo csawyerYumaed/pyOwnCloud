@@ -13,6 +13,19 @@ import logging
 
 logging.basicConfig(level=logging.DEBUG, format='%(name)s-%(levelname)s: %(message)s')
 
+from ctypes import CDLL,c_int
+import ctypes.util
+sl = CDLL(ctypes.util.find_library('neon-gnutls'))
+
+ne_sock_init = sl.ne_sock_init
+ne_sock_init.argtypes = []
+ne_sock_init.restype = c_int
+
+
+ne_sock_exit = sl.ne_sock_exit
+ne_sock_init.argtypes = []
+ne_sock_init.restype = None
+
 try:
 	import keyring
 except:
@@ -143,6 +156,7 @@ class ownCloudSync():
 		return 0
 
 	def sync(self):
+		ne_sock_init()
 		r = csynclib.csync_create(self.ctx, self.cfg['src'], self.cfg['url'])
 		if r != 0:
 			self.error('csync_create', r)
@@ -178,6 +192,8 @@ class ownCloudSync():
 					ulimit = ctypes.c_int(int(self.cfg['uploadlimit']) * 1000)
 					self.logger.debug('Upload limit: %i', ulimit.value)
 					csynclib.csync_set_module_property(self.ctx,'bandwidth_limit_upload',ctypes.pointer(ulimit))
+		print csynclib.csync_commit(self.ctx)
+
 		r = csynclib.csync_update(self.ctx)
 		if r != 0:
 			self.error('csync_update', r)
@@ -186,13 +202,14 @@ class ownCloudSync():
 		if r != 0:
 			self.error('csync_reconcile', r)
 		self.logger.debug('Reconcile done.')
-		r = csynclib.csync_propagate(self.ctx)
-		if r != 0:
-			self.error('csync_propogate', r)
-		self.logger.debug('Propogate finished, destroying.')
+		#r = csynclib.csync_propagate(self.ctx)
+		#if r != 0:
+		#	self.error('csync_propogate', r)
+		#self.logger.debug('Propogate finished, destroying.')
 		r = csynclib.csync_destroy(self.ctx)
 		if r != 0:
 			self.error('csync_destroy', r)
+		ne_sock_exit()
 
 	def get_progress_callback(self):
 		def progress_wrapper(progress_p, userdata_p):
