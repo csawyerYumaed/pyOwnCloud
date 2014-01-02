@@ -1,6 +1,8 @@
 pyOwnCloud
 ==========
 
+!Attension: the recent version of pyOwnCloud don't works with the recent versions of ocsync! PyOwnCloud needs a version lower than 0.91.0!
+
 ownCloud CLI client written in python, more info about owncloud: www.owncloud.org
 
 This code is now in production use, and has been tested against a variety of Linux machines,
@@ -15,10 +17,11 @@ Support/Discussion:
 
 Requirements:
 -------------
-* The ocsync C library from ownCloud. If you install Mirall/owncloud-client, you get it for free on Linux.
+* The ocsync C library from ownCloud < 0.91.0. If you install Mirall/owncloud-client, you get it for free on Linux.
 	If you don't want to install mirall, you have to install the 'ocsync' binary package,
 	usually named 'libocsync0' and the owncloud plugin, usually named 'libocsync-plugin-owncloud'.
 	Installing the plugin should also install 'libocsync0' as a dependency.
+
 When running Debian (jessy) or Ubuntu raring, you can install it right from the archives.
 For other distributions you can get them through https://build.opensuse.org/package/show/isv:ownCloud:devel/ocsync .
 * Python > 2.6 < 3 (patches welcome)
