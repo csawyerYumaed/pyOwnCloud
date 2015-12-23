@@ -3,6 +3,8 @@ pyOwnCloud
 
 !Attention: the recent version of pyOwnCloud doesn't work with the recent versions of ocsync! PyOwnCloud needs a version lower than 0.91.0!
 
+FYI, the official owncloud client includes a command line client now, and may alleviate most use cases for this code: https://doc.owncloud.org/desktop/2.1/advancedusage.html
+
 ownCloud CLI client written in python, more info about owncloud: www.owncloud.org
 
 This code is now in production use, and has been tested against a variety of Linux machines,
