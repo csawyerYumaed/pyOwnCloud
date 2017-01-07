@@ -15,7 +15,6 @@ Support/Discussion:
 -------------------
 
 * Use github for issues/patches/etc: https://github.com/csawyerYumaed/pyOwnCloud
-* For discussion use: http://lists.cknow.org/listinfo.cgi/pyowncloud-cknow.org (pyowncloud <@> lists.cknow.org)
 
 Requirements:
 -------------
