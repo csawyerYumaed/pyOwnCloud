@@ -1,9 +1,25 @@
 pyOwnCloud
 ==========
 
-!Attention: the recent version of pyOwnCloud doesn't work with the recent versions of ocsync! PyOwnCloud needs a version lower than 0.91.0!
+IMPORTANT UPDATE
+=================
+It's come to my attention that owncloud requires X running to auto-sync, they have 'owncloudcmd' that will sync once and exit. To get around that, here are some solutions:
 
-FYI, the official owncloud client includes a command line client now, and may alleviate most use cases for this code: https://doc.owncloud.org/desktop/2.1/advancedusage.html
+ That's kind of awful.  You can run X behind the scenes with 
+xvfb (installable on most all distro's). something like: xvfb-run 
+<path to owncloud>
+
+if you wanted pyOwncloud to run, you will need to rebind to the latest owncloud libs. If I remember  right, it's CFFI bindings that I used.  Since we don't run it here anymore, I'm not really in a place to mess with the bindings anymore.
+
+Another option, would be to run something like https://pypi.python.org/pypi/watchdog, and have it monitor the FS for events in the dir(s) yuo care about and then have it run owncloudcmd for you.  That would have it only run on change(s).
+Actually.. if you wanted to update pyOwncloud to do that, I'd happily merge that and give you admin rights.
+
+Most of this above was from an email exchange with someone, but I think it's worth mentioning here, since apparently the owncloud docs don't talk about it very well.
+
+End update
+========================================
+
+
 
 ownCloud CLI client written in python, more info about owncloud: www.owncloud.org
 
