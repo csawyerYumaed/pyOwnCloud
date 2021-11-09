@@ -37,7 +37,7 @@ for tag in repo.tags:
     except ValueError:
         continue
 
-    #only new versions interessting us
+    #only new versions interesting us
     if version in known_versions:
         continue
 

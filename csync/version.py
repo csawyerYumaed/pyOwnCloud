@@ -11,7 +11,7 @@ class ver(object):
 		self.loadVersion()
 		self.setup()
 	def setup(self):
-		"""sublass this to do something useful for yourself"""
+		"""subclass this to do something useful for yourself"""
 		pass
 	@property
 	def asFloat(self):
